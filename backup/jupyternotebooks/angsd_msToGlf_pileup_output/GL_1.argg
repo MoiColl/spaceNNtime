@@ -1,2 +1,0 @@
--in angsd_msToGlf_pileup_output/tree_5ind.ms -out angsd_msToGlf_pileup_output/GL_1 -err 0.015000 -depth 1.000000 -Nsites 0 -singleOut 0 -regLen 10000 -printSNP 0 -onlyPoly 1 -pileup 1 -simpleRand 2 -depthFile (null) -seed 1234 -nind 5 -psmc 0 -do_seq_glf 1 -simHap 0
--in angsd_msToGlf_pileup_output/tree_5ind.ms -out angsd_msToGlf_pileup_output/GL_1 -regLen 10000 -depth 1 -err 0.015 -pileup 1 -nind 5 -seed 1234 -onlyPoly 1 (null) 
