@@ -31,5 +31,9 @@ data.frame(name       = data$name,        ind_id  = data$ind_id,  pedigree_id = 
     mutate(lat = st_transform(geometry, 4326)[[1]][1], 
            lon = st_transform(geometry, 4326)[[1]][2]) %>% 
            select(-c(geometry, name, pedigree_id)) %>%
+    group_by(ind_id, pop, time, sampled, lat, lon) %>%
+    mutate(n = 1, n = cumsum(n), n = paste("node", n, sep = "")) %>%
+    spread(n, node_id) %>%
+    ungroup() %>%
     write.table(., file = paste(sim_path, "/metadata.txt", sep = ""), 
                 append = FALSE, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
