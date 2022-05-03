@@ -1,41 +1,40 @@
 #A. Importing
 from gwf import Workflow
-#import pandas as pd
-#import numpy as np
+
 #B. Templates
-
 ##B.1.
-def spaceNNtime_sim(exp, data_type, norm, ys, p, mean_depth, std_depth, e, width):
+def spaceNNtime_sim(sim, exp, nam, met, siz, snp, pre, typ, cov, err, nod, mem, que, tim):
 	'''
-	Runs spaceNNtime in simulations
+	Runs spaceNNtime for simulated data
 	'''
-	inputs  = ["sandbox/europe/processed_tree/tree.trees",
-	           "sandbox/europe/spaceNNtime/exp{exp}/metadata.csv".format(exp = exp),
-	           "sandbox/europe/spaceNNtime/exp{exp}/exp{exp}.yaml".format(exp = exp)]
-	outputs = ["sandbox/europe/spaceNNtime/exp{exp}/DONE.txt".format(exp = exp)]
-	options = {
-			'memory'  : '8g',
-			'walltime': '1-00:00:00',
-			'account' : 'GenerationInterval'
-	}
-	if exp != "001":
-		options['memory'] = "20g"
-		#options['queue']  = "gpu"
-		#options['gres']   = "gpu:1"
-	else:
-		options['memory'] = "50g"#"50g"
-
-
+	inputs  = ["data/{sim}/tree.trees".format(sim = sim),
+	           "data/{sim}/downsample/{met}.txt".format(sim = sim, met = met)]
+	outputs = ["sandbox/completed/{sim}_{exp}.DONE".format(exp = exp)]
+	options = {'memory'  : mem, 'walltime': tim, 'account' : 'GenerationInterval'}
+	if que != "gpu":
+		options['queue']  = "gpu"
+		options['gres']   = "gpu:1"
 	spec = '''
 	echo "JOBID:" $PBS_JOBID
 	
-	mkdir -p sandbox/europe/spaceNNtime/exp{exp}/models
-	mkdir -p sandbox/europe/spaceNNtime/exp{exp}/history_plots
+	mkdir -p sandbox/completed
+	mkdir -p sandbox/{sim}/{exp}/models
+	mkdir -p sandbox/{sim}/{exp}/history_plots
 
-	python scripts/spaceNNtime_sim.py {exp} {data_type} {norm} {ys} {p} {mean_depth} {std_depth} {e} {width}
+	python scripts/spaceNNtime_sim.py {sim} {exp} {nam} {met} {siz} {snp} {pre} {typ} {cov} {err} {nod}
 
-	touch sandbox/europe/spaceNNtime/exp{exp}/DONE.txt
-	'''.format(exp = exp, data_type = data_type, norm = norm, ys = ys, p = p, mean_depth = mean_depth, std_depth = std_depth, e = e, width = width)
+	touch sandbox/completed/{sim}_{exp}.DONE
+	'''.format(sim = sim, exp = exp, nam = nam, met = met, siz = siz, snp = snp, pre = pre, typ = typ, cov = cov, err = err, nod = nod)
 
 
 	return inputs, outputs, options, spec
+
+#C. Functions
+def special_sampling(metadata, time_bins, n, step, downsample):
+	for i in range(len(time_bins)):
+		metadata_sub = metadata[(metadata.time >= time_bins[i]-step) & (metadata.time < time_bins[i])]
+		if len(metadata_sub) > n[i]:
+			(metadata_sub.sample(n=n[i], replace=False, weights=None, random_state=1234)
+				.to_csv(downsample, sep='\t', header=True, index=False, mode='a'))
+		else:
+			metadata_sub.to_csv(downsample, sep='\t', header=True, index=False, mode='a')

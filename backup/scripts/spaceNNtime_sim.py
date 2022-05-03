@@ -2,33 +2,18 @@ import sys
 import pyslim
 import pandas as pd
 sys.path.append('scripts/')
-from spacetime_templates import *
-
-exp, data_type, norm, ys, p = sys.argv[1:]
+from spaceNNtime_templates import *
+###############################
+#exp, data_type, norm, ys, p = sys.argv[1:]
+sim, exp, nam, met, siz, snp, pre, typ, cov, err, nod = sys.argv[1:]
 p = float(p)
 
 
-ts            = pyslim.load("sandbox/europe/processed_tree/tree.trees")
-metadata      = pd.read_csv("sandbox/europe/spaceNNtime/exp{exp}/metadata.csv".format(exp = exp))
+ts            = pyslim.load("data/{}/tree.trees".format(sim))
+metadata      = pd.read_csv("data/{}/metadata/{}.txt".format(sim, met))
 allele_counts = allele_counts_from_simulations(ts, metadata, p)
 tra_val_tes   = get_tra_val_tes(None, file = "sandbox/europe/spaceNNtime/exp{exp}/exp{exp}.yaml".format(exp = exp))
 
-# print(ts)
-# print("metadata.shape")
-# print(metadata.shape)
-# print("metadata")
-# print(metadata)
-# print("allele_counts")
-# print(allele_counts)
-# print("len(tra_val_tes)")
-# print(len(tra_val_tes))
-# print("len(tra_val_tes[0])")
-# print(len(tra_val_tes[0]))
-# print("len(tra_val_tes[0]['tra'])")
-# print(len(tra_val_tes[0]['tra']))
-# print(len(tra_val_tes[0]['val']))
-# print(len(tra_val_tes[0]['tes']))
-# sys.exit()
 
 if ys == "spaceNNtime":
     lat_long_time = metadata[["loc1", "loc2", "time"]].to_numpy()
