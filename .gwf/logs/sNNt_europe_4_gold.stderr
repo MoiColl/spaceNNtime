@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/moicoll/spaceNNtime/scripts/spaceNNtime_sim.py", line 5, in <module>
+    from spaceNNtime_templates import *
+  File "/faststorage/home/moicoll/spaceNNtime/backup/scripts/spaceNNtime_templates.py", line 10, in <module>
+    import simGL
+ModuleNotFoundError: No module named 'simGL'

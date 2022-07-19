@@ -1,0 +1,52 @@
+name: gwf
+channels:
+  - conda-forge
+  - bioconda
+  - kaspermunch
+  - r
+  - gwforg
+  - genomedk
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=2_gnu
+  - bottleneck=1.3.4=py37hda87dfa_1
+  - ca-certificates=2022.4.26=h06a4308_0
+  - click=8.1.3=py37h89c1867_0
+  - click-plugins=1.1.1=py_0
+  - gwf=1.7.2=py_0
+  - importlib-metadata=4.11.3=py37h89c1867_1
+  - ld_impl_linux-64=2.36.1=hea4e1c9_2
+  - libblas=3.9.0=14_linux64_openblas
+  - libcblas=3.9.0=14_linux64_openblas
+  - libffi=3.3=h58526e2_2
+  - libgcc-ng=11.2.0=h1d223b6_16
+  - libgfortran-ng=11.2.0=h69a702a_16
+  - libgfortran5=11.2.0=h5c6108e_16
+  - libgomp=11.2.0=h1d223b6_16
+  - liblapack=3.9.0=14_linux64_openblas
+  - libopenblas=0.3.20=pthreads_h78a6416_0
+  - libstdcxx-ng=11.2.0=he4da1e4_16
+  - libzlib=1.2.11=h166bdaf_1014
+  - ncurses=6.3=h27087fc_1
+  - nomkl=1.0=h5ca1d4c_0
+  - numexpr=2.8.0=py37h85a3170_102
+  - numpy=1.21.6=py37h976b520_0
+  - openssl=1.1.1n=h166bdaf_0
+  - pandas=1.3.4=py37h8c16a72_0
+  - pip=22.0.4=pyhd8ed1ab_0
+  - python=3.7.13=h12debd9_0
+  - python-dateutil=2.8.2=pyhd8ed1ab_0
+  - python_abi=3.7=2_cp37m
+  - pytz=2022.1=pyhd8ed1ab_0
+  - readline=8.1.2=h7f8727e_1
+  - setuptools=62.1.0=py37h89c1867_0
+  - six=1.16.0=pyh6c4a22f_0
+  - sqlite=3.38.3=h4ff8645_0
+  - tk=8.6.12=h27826a3_0
+  - typing_extensions=4.2.0=pyha770c72_1
+  - wheel=0.37.1=pyhd8ed1ab_0
+  - xz=5.2.5=h516909a_1
+  - zipp=3.8.0=pyhd8ed1ab_0
+  - zlib=1.2.11=h166bdaf_1014
+prefix: /home/moicoll/miniconda3/envs/gwf
