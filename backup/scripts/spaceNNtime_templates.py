@@ -1,22 +1,15 @@
 #A. Import
-#from collections import defaultdict
 import numpy      as np
 import pandas     as pd
 import os
 import sys
-import yaml
+import json
+#import yaml
 from matplotlib  import pyplot as plt
 import tensorflow as tf
-#import gzip
-#import time
-#import allel
-#import zarr
-#import numcodecs
-#import time
-#import dask
+import simGL
 
 #B. Functions
-
 #B.1
 def generate_tra_val_tes(samples, n_tes = 3, p_tra = 0.9, max_tes_groups = None):
     '''
@@ -95,14 +88,14 @@ def get_tra_val_tes(samples, file = "", overwrite = False, n_tes = 3, p_tra = 0.
         This function generates all the different sets of training, validating and testing sets such that all samples in the "samples" variable
         are part of the test set once.
 
-        If there is an existing file with such a random sets, it is possible to get the sets from the file, generate a new one and overwrite or
+        If there is an existing file with such random sets, it is possible to get the sets from the file, generate a new one and overwrite or
         ignore the file and generate a set without storing it in a file.
 
     Input:
         - samples   : numpy array (n_samples, ) with the samples IDs to be divided into train, validation and test sets. All samples are going to be included
                       only once in one test set.
-        - file      : string  with the file name and path where the output dictionary "tra_val_tes" is going to be stored in yaml format. It is important that
-                      the file termination is ".yaml". If the string is empty, 
+        - file      : string  with the file name and path where the output dictionary "tra_val_tes" is going to be stored in json format. It is important that
+                      the file termination is ".json". If the string is empty, 
         - overwrite : boolean variable that will decide if the already stored file should be ignored, generate a new set and overwrite the file.
         - n_tes     : integer with the test set size. There will be round_up(len(samples)/n_tes) test sets in total.
         - p_tra     : float number [0-1] proportion of training samples to validation samples. The number of training samples is going to be round down 
@@ -116,18 +109,20 @@ def get_tra_val_tes(samples, file = "", overwrite = False, n_tes = 3, p_tra = 0.
     if file:
         if os.path.isfile(file) and not overwrite:
             with open(file, 'r') as tra_val_tes_file:
-                tra_val_tes = yaml.load(tra_val_tes_file, Loader=yaml.FullLoader)
+                tra_val_tes = json.load(tra_val_tes_file)
+                #tra_val_tes = yaml.load(tra_val_tes_file, Loader=yaml.FullLoader)
         else:
             tra_val_tes = generate_tra_val_tes(samples, n_tes, p_tra, max_tes_groups)
             with open(file, 'w') as tra_val_tes_file:
-                yaml.dump(tra_val_tes, tra_val_tes_file, default_flow_style=False)
+                json.dump(tra_val_tes, tra_val_tes_file)
+                #yaml.dump(tra_val_tes, tra_val_tes_file, default_flow_style=False)
     else:
         tra_val_tes = generate_tra_val_tes(samples, n_tes, p_tra, max_tes_groups)
         
     return tra_val_tes
 
 #B.3
-def allele_counts_from_simulations(ts, metadata, p = 1, diploid = True):
+def get_input(ts, metadata, snp, typ, cov, err):
     '''
     Def :
         Obtain the allele counts for variant sites from a simulated tree structure (ts) that are not singletons or nearly fixed for a subset 
@@ -135,24 +130,85 @@ def allele_counts_from_simulations(ts, metadata, p = 1, diploid = True):
     Input :
         - ts       : tree data structure
         - metadata : pandas DataFrame (n_individuals, features) in which for each individual there are indicated both nodes ID in the ts in
-                     columns named "nod1" and "nod2"
-    Output:
+                     columns named "node1" and "node2"
+    Output :
         -  allele_counts : numpy array (n_variants, n_individuals) with allele counts per individual.
             - 0 : Ancestral allele homozigous
             - 1 : Heterozygous
             - 2 : Derived allele homozigous 
     '''
     np.random.seed(1234)
-    allele_counts = []
-    for v in ts.variants(samples = metadata[["nod1", "nod2"]].to_numpy().reshape(-1).tolist()):
-        ac = v.genotypes.sum()
+    gm = []
+    print(metadata[["node1", "node2"]])#.to_numpy())#.reshape(-1).tolist())
+    for n in metadata[["node1", "node2"]].to_numpy().reshape(-1).tolist():
+        #print(n)
+        for v in ts.variants(samples = [n]):
+            pass
+            #print(v)
+    for v in ts.variants(samples = metadata[["node1", "node2"]].to_numpy().reshape(-1).tolist()):
+        print(v)
+        gl = v.genotypes.sum()
         #the allele is polymorphic and not a singleton, it is biallelic and randombly is sampled (this is used when we want to keep p number of alleles)
-        if ac > 1 and ac < metadata.shape[0]-1 and len(v.alleles) < 3 and np.random.binomial(1, p):
-            if diploid:
-                allele_counts.append(v.genotypes.reshape(-1, 2).sum(axis = 1).tolist())
-            else:
-                allele_counts.append(v.genotypes.tolist())
-    return np.array(allele_counts)
+        if gl > 1 and gl < metadata.shape[0]-1 and len(v.alleles) < 3 and np.random.binomial(1, snp):
+            if typ == "gt":
+                gm.append(v.genotypes.reshape(-1, 2).sum(axis = 1).tolist())
+            elif typ in ["gl", "gl_mix"]:
+                gm.append(v.genotypes.tolist())
+    gm = np.array(gm)
+    if typ == "gt":
+        return gm
+    elif typ == "gl_mix":
+        arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
+        GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
+
+        argsorGL = np.argsort(GL)
+
+        minGLidx = np.argmax(argsorGL == 0, axis = 2).reshape(-1)
+
+        dim1_idx = np.repeat(np.arange(GL.shape[0]), GL.shape[1])
+        dim2_idx = np.tile(np.arange(GL.shape[1]), GL.shape[0])
+        dim3_idx = np.argmax(np.argsort(GL) == 1, axis = 2).reshape(-1)
+        midGLval = GL[dim1_idx, dim2_idx, dim3_idx]
+
+        missing  = ((GL == 0).sum(axis = 2) == 3).reshape(-1)
+
+        minGLidx[missing] = -1#np.random.choice([0, 1, 2]) #-1
+        midGLval[missing] = -1#0 #midGLval[missing] = max(midGLval)*2
+
+        GLmix = []
+        for i in range(GL.shape[1]):
+            GLmix.append(np.dstack((minGLidx[i::GL.shape[1]], midGLval[i::GL.shape[1]])).flatten().tolist())
+        GLmix = np.array(GLmix)
+
+        return GLmix
+    elif typ == "gl":
+        arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
+        GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
+        return GL.transpose((1, 0, 2)).reshape(-1).reshape(GL.shape[1], GL.shape[0]*3)
+
+
+def get_output(pre, metadata):
+    '''
+    Def :
+        Extract the output that the NN will predict from the input.
+    Input :
+        - pre : string that defines if the output that is extracted has to be:
+            - sNNt  : space and time
+            - space : only space (latitude and longitude)
+            - time  : only time
+        - metadata : the pandas DataFrame from which the output will be extracted.
+    Output :
+        - numpy array with the values of the columns corresponding to the information that 
+          has to be extracted.
+    '''
+    if   pre == "sNNt":
+        return metadata[["lat", "lon", "time"]].to_numpy()
+    elif pre == "space":
+        return metadata[["lat", "lon"]].to_numpy()
+    elif pre == "time":
+        return metadata[["time"]].to_numpy()
+    else:
+        sys.exit("Incorrect prediction value {}\n".format(pre))
 
 #B.4
 def mean_sd_Znorm(a):
@@ -252,16 +308,19 @@ def pred(model, tes_aco):
      #model.predict(tes_aco)  
 
 #B.9
-def write_pred(samples, input_type, ys, i, tra_val_tes, n_snps, tes_loc, predict, means, stds, new_file, file_name):
+def write_pred(samples, i, tes, n_snps, tes_loc, predict, means, stds, new_file, file_name, sim, exp, nam, pre, typ):
     df1 = pd.DataFrame({
-       "ind"                 : samples[tra_val_tes[i]["tes"]],
-       "input_type"          : input_type,
+       "sim"                 : sim,
+       "exp"                 : exp,
+       "nam"                 : nam, 
+       "ind"                 : samples[tes],
+       "typ"                 : typ,
        "group"               : i,
-       "index"               : tra_val_tes[i]["tes"],
+       "index"               : tes,
        "n_snps"              : n_snps
        })
 
-    if ys == "spaceNNtime":
+    if pre == "sNNt":
         df2 = pd.DataFrame({
             "real_latitude_norm"  : tes_loc[:, 0],
             "real_longitude_norm" : tes_loc[:, 1],
@@ -277,7 +336,7 @@ def write_pred(samples, input_type, ys, i, tra_val_tes, n_snps, tes_loc, predict
             "pred_time"           : (predict[:, 2]*stds[2])+means[2]
        })
     
-    elif ys == "space":
+    elif pre == "space":
         df2 = pd.DataFrame({
             "real_latitude_norm"  : tes_loc[:, 0],
             "real_longitude_norm" : tes_loc[:, 1],
@@ -289,7 +348,7 @@ def write_pred(samples, input_type, ys, i, tra_val_tes, n_snps, tes_loc, predict
             "pred_longitude"      : (predict[:, 1]*stds[1])+means[1]
         })
 
-    elif ys == "time":
+    elif pre == "time":
         df2 = pd.DataFrame({
             "real_time_norm"  : tes_loc[:, 0],
             "pred_time_norm"  : predict[:, 0],
@@ -298,7 +357,7 @@ def write_pred(samples, input_type, ys, i, tra_val_tes, n_snps, tes_loc, predict
         })
 
     else:
-        sys.exit("Ys not correct!\n")
+        sys.exit("pre variable not correct!. It can only be sNNt, time or space and it is {}\n".format(pre))
 
     df = pd.concat([df1, df2], axis=1)
 
