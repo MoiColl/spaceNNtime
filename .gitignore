@@ -1,1 +1,9 @@
-backup/.gitignore
+data/*
+files/*
+results/*
+sandbox/*
+scripts/slendr
+**/.DS_Store
+**/._.DS_Store
+backup/jupyternotebooks/mesoneo_dataexplore.ipynb
+backup/jupyternotebooks/neo.impute.1000g.sampleInfo_nospaces.tsv
