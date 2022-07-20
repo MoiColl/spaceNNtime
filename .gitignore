@@ -1,8 +1,10 @@
-data/*
-files/*
-results/*
-sandbox/*
-scripts/slendr
+data/
+files/
+results/
+sandbox/
+.gwf/
+backup/scripts/slendr/
+backup/scripts/simGL/
 **/.DS_Store
 **/._.DS_Store
 backup/jupyternotebooks/mesoneo_dataexplore.ipynb

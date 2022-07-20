@@ -51,10 +51,10 @@ def generate_tra_val_tes(samples, n_tes = 3, p_tra = 0.9, max_tes_groups = None)
         max_tes_groups = idx_samples_fake_shuff.shape[0]
     
     for i in range(max_tes_groups):
-        tes            = idx_samples_fake_shuff[i, :]
-        tra_val_tes[i] = {}
-        tes            = tes[tes < n_samples]
-        non_tra_val    = tes
+        tes                 = idx_samples_fake_shuff[i, :]
+        tra_val_tes[str(i)] = {}
+        tes                 = tes[tes < n_samples]
+        non_tra_val         = tes
 
         while non_tra_val.shape[0] < n_tes:
             exc = np.random.randint(n_samples, size=1)
@@ -74,9 +74,9 @@ def generate_tra_val_tes(samples, n_tes = 3, p_tra = 0.9, max_tes_groups = None)
         val.sort()
         tes.sort()
 
-        tra_val_tes[i]["tra"] = tra.tolist()
-        tra_val_tes[i]["val"] = val.tolist()
-        tra_val_tes[i]["tes"] = tes.tolist()
+        tra_val_tes[str(i)]["tra"] = tra.tolist()
+        tra_val_tes[str(i)]["val"] = val.tolist()
+        tra_val_tes[str(i)]["tes"] = tes.tolist()
 
         
     return tra_val_tes
@@ -139,14 +139,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
     '''
     np.random.seed(1234)
     gm = []
-    print(metadata[["node1", "node2"]])#.to_numpy())#.reshape(-1).tolist())
-    for n in metadata[["node1", "node2"]].to_numpy().reshape(-1).tolist():
-        #print(n)
-        for v in ts.variants(samples = [n]):
-            pass
-            #print(v)
     for v in ts.variants(samples = metadata[["node1", "node2"]].to_numpy().reshape(-1).tolist()):
-        print(v)
         gl = v.genotypes.sum()
         #the allele is polymorphic and not a singleton, it is biallelic and randombly is sampled (this is used when we want to keep p number of alleles)
         if gl > 1 and gl < metadata.shape[0]-1 and len(v.alleles) < 3 and np.random.binomial(1, snp):
