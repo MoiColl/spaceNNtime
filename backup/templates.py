@@ -16,7 +16,7 @@ def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, err, nod, mem, que, 
 		options['gres']   = "gpu:1"
 	spec = '''
 	source /home/moicoll/.bash_profile
-	conda activate sNNt_au
+	conda activate sNNt_au3
 	
 	echo "JOBID:" $PBS_JOBID
 	

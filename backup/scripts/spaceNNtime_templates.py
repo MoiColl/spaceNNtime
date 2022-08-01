@@ -301,7 +301,7 @@ def pred(model, tes_aco):
      #model.predict(tes_aco)  
 
 #B.9
-def write_pred(samples, i, tes, n_snps, tes_loc, predict, means, stds, new_file, file_name, sim, exp, nam, pre, typ):
+def write_pred(samples, i, tes, n_snps, tes_loc, predict, means, stds, new_file, file_name, sim, exp, nam, pre, typ, run):
     df1 = pd.DataFrame({
        "sim"                 : sim,
        "exp"                 : exp,
@@ -310,7 +310,8 @@ def write_pred(samples, i, tes, n_snps, tes_loc, predict, means, stds, new_file,
        "typ"                 : typ,
        "group"               : i,
        "index"               : tes,
-       "n_snps"              : n_snps
+       "n_snps"              : n_snps,
+       "run_time"            : run,
        })
 
     if pre == "sNNt":

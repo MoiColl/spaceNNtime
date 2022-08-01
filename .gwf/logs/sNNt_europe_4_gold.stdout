@@ -1,232 +1,121 @@
-JOBID: 3992099
-getting travaltes
+JOBID: 4038407
+Which devices are available?
+[name: "/device:CPU:0"
+device_type: "CPU"
+memory_limit: 268435456
+locality {
+}
+incarnation: 10991333222792344543
+]
+Getting travaltes
 Done
-Processing batch 0
-Processing batch 1
-Processing batch 2
-Processing batch 3
-Processing batch 4
-Processing batch 5
-Processing batch 6
-Processing batch 7
-Processing batch 8
-Processing batch 9
-Processing batch 10
-Processing batch 11
-Processing batch 12
-Processing batch 13
-Processing batch 14
-Processing batch 15
-Processing batch 16
-Processing batch 17
-Processing batch 18
-Processing batch 19
-Processing batch 20
-Processing batch 21
-Processing batch 22
-Processing batch 23
-Processing batch 24
-Processing batch 25
-Processing batch 26
-Processing batch 27
-Processing batch 28
-Processing batch 29
-Processing batch 30
-Processing batch 31
-Processing batch 32
-Processing batch 33
-Processing batch 34
-Processing batch 35
-Processing batch 36
-Processing batch 37
-Processing batch 38
-Processing batch 39
-Processing batch 40
-Processing batch 41
-Processing batch 42
-Processing batch 43
-Processing batch 44
-Processing batch 45
-Processing batch 46
-Processing batch 47
-Processing batch 48
-Processing batch 49
-Processing batch 50
-Processing batch 51
-Processing batch 52
-Processing batch 53
-Processing batch 54
-Processing batch 55
-Processing batch 56
-Processing batch 57
-Processing batch 58
-Processing batch 59
-Processing batch 60
-Processing batch 61
-Processing batch 62
-Processing batch 63
-Processing batch 64
-Processing batch 65
-Processing batch 66
-Processing batch 67
-Processing batch 68
-Processing batch 69
-Processing batch 70
-Processing batch 71
-Processing batch 72
-Processing batch 73
-Processing batch 74
-Processing batch 75
-Processing batch 76
-Processing batch 77
-Processing batch 78
-Processing batch 79
-Processing batch 80
-Processing batch 81
-Processing batch 82
-Processing batch 83
-Processing batch 84
-Processing batch 85
-Processing batch 86
-Processing batch 87
-Processing batch 88
-Processing batch 89
-Processing batch 90
-Processing batch 91
-Processing batch 92
-Processing batch 93
-Processing batch 94
-Processing batch 95
-Processing batch 96
-Processing batch 97
-Processing batch 98
-Processing batch 99
-Processing batch 100
-Processing batch 101
-Processing batch 102
-Processing batch 103
-Processing batch 104
-Processing batch 105
-Processing batch 106
-Processing batch 107
-Processing batch 108
-Processing batch 109
-Processing batch 110
-Processing batch 111
-Processing batch 112
-Processing batch 113
-Processing batch 114
-Processing batch 115
-Processing batch 116
-Processing batch 117
-Processing batch 118
-Processing batch 119
-Processing batch 120
-Processing batch 121
-Processing batch 122
-Processing batch 123
-Processing batch 124
-Processing batch 125
-Processing batch 126
-Processing batch 127
-Processing batch 128
-Processing batch 129
-Processing batch 130
-Processing batch 131
-Processing batch 132
-Processing batch 133
-Processing batch 134
-Processing batch 135
-Processing batch 136
-Processing batch 137
-Processing batch 138
-Processing batch 139
-Processing batch 140
-Processing batch 141
-Processing batch 142
-Processing batch 143
-Processing batch 144
-Processing batch 145
-Processing batch 146
-Processing batch 147
-Processing batch 148
-Processing batch 149
-Processing batch 150
-Processing batch 151
-Processing batch 152
-Processing batch 153
-Processing batch 154
-Processing batch 155
-Processing batch 156
-Processing batch 157
-Processing batch 158
-Processing batch 159
-Processing batch 160
-Processing batch 161
-Processing batch 162
-Processing batch 163
-Processing batch 164
-Processing batch 165
-Processing batch 166
-Processing batch 167
-Processing batch 168
-Processing batch 169
-Processing batch 170
-Processing batch 171
-Processing batch 172
-Processing batch 173
-Processing batch 174
-Processing batch 175
-Processing batch 176
-Processing batch 177
-Processing batch 178
-Processing batch 179
-Processing batch 180
-Processing batch 181
-Processing batch 182
-Processing batch 183
-Processing batch 184
-Processing batch 185
-Processing batch 186
-Processing batch 187
-Processing batch 188
-Processing batch 189
-Processing batch 190
-Processing batch 191
-Processing batch 192
-Processing batch 193
-Processing batch 194
-Processing batch 195
-Processing batch 196
-Processing batch 197
-Processing batch 198
-Processing batch 199
-Processing batch 200
-Processing batch 201
-Processing batch 202
-Processing batch 203
-Processing batch 204
-Processing batch 205
-Processing batch 206
-Processing batch 207
-Processing batch 208
-Processing batch 209
-Processing batch 210
-Processing batch 211
-Processing batch 212
-Processing batch 213
-Processing batch 214
-Processing batch 215
-Processing batch 216
-Processing batch 217
-Processing batch 218
-Processing batch 219
-Processing batch 220
-Processing batch 221
-Processing batch 222
-Processing batch 223
-Processing batch 224
-Processing batch 225
-Processing batch 226
-Processing batch 227
-Processing batch 228
+Batches up to 446 already run. Starting from there...
+
+Processing batch 447
+1.3869192163149515 min
+Processing batch 448
+1.3754923741022747 min
+Processing batch 449
+1.3755382855733236 min
+Processing batch 450
+1.3753760854403179 min
+Processing batch 451
+1.375965960820516 min
+Processing batch 452
+1.3788894176483155 min
+Processing batch 453
+1.3753640532493592 min
+Processing batch 454
+1.3761538545290628 min
+Processing batch 455
+1.3754515488942465 min
+Processing batch 456
+1.3755986412366232 min
+Processing batch 457
+1.3801576375961304 min
+Processing batch 458
+1.3760026216506958 min
+Processing batch 459
+1.375865924358368 min
+Processing batch 460
+1.375594965616862 min
+Processing batch 461
+1.3755618492762247 min
+Processing batch 462
+1.379988960425059 min
+Processing batch 463
+1.3755367080370584 min
+Processing batch 464
+1.3751204013824463 min
+Processing batch 465
+1.3778364022572835 min
+Processing batch 466
+1.3750229636828104 min
+Processing batch 467
+1.3785606304804483 min
+Processing batch 468
+1.3750882267951965 min
+Processing batch 469
+1.3754474202791849 min
+Processing batch 470
+1.374824066956838 min
+Processing batch 471
+1.3743123610814412 min
+Processing batch 472
+1.3783061663309732 min
+Processing batch 473
+1.374844213326772 min
+Processing batch 474
+1.3746949871381124 min
+Processing batch 475
+1.3754323601722718 min
+Processing batch 476
+1.5184568603833517 min
+Processing batch 477
+1.3799903829892477 min
+Processing batch 478
+1.375946851571401 min
+Processing batch 479
+1.3762288292249043 min
+Processing batch 480
+1.3760921796162924 min
+Processing batch 481
+1.3768535812695821 min
+Processing batch 482
+1.3810951789220174 min
+Processing batch 483
+1.3761664787928263 min
+Processing batch 484
+1.3764155387878418 min
+Processing batch 485
+1.3763570706049602 min
+Processing batch 486
+1.3769168734550477 min
+Processing batch 487
+1.3814844648043314 min
+Processing batch 488
+1.3757930795351665 min
+Processing batch 489
+1.3760332703590392 min
+Processing batch 490
+1.3760133107503256 min
+Processing batch 491
+1.3762866139411927 min
+Processing batch 492
+1.3802052974700927 min
+Processing batch 493
+1.3758832335472106 min
+Processing batch 494
+1.3758984565734864 min
+Processing batch 495
+1.3765016595522563 min
+Processing batch 496
+1.3760189255078634 min
+Processing batch 497
+1.3793233076731364 min
+Processing batch 498
+1.3760122338930765 min
+Processing batch 499
+1.3758239507675172 min
+Processing batch 500
+1.3759482940038046 min
