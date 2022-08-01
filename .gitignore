@@ -1,7 +1,11 @@
 data/
 files/
 results/
-sandbox/
+sandbox/completed/
+sandbox/*/*/history_plots/
+sandbox/*/*/models/
+sandbox/*/*/tra_val_tes_*.json
+sandbox/*/*/carryon.txt
 .gwf/
 backup/scripts/slendr/
 backup/scripts/simGL/
