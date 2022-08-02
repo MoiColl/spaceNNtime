@@ -1,4 +1,4 @@
-data/
+data/*/*.*
 files/neo.*
 results/
 sandbox/completed/
