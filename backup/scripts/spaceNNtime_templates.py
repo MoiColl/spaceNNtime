@@ -145,7 +145,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
         if gl > 1 and gl < metadata.shape[0]-1 and len(v.alleles) < 3 and np.random.binomial(1, snp):
             if typ == "gt":
                 gm.append(v.genotypes.reshape(-1, 2).sum(axis = 1).tolist())
-            elif typ in ["gl", "gl_mix"]:
+            elif typ in ["gl", "gl_mix", "gp"]:
                 gm.append(v.genotypes.tolist())
     gm = np.array(gm)
     if typ == "gt":
