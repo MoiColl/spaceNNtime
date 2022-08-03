@@ -36,11 +36,9 @@ else:
     new_file = True
     print("No batches run yet. Starting form first batch...\n".format(start_batch-1))
 
-
-
+print("input shape:", input.shape)
 prev_time = time.time()
 for i in range(start_batch, len(tra_val_tes)):
-    i = str(i)
     print("Processing batch {}".format(i), flush = True)
     #Normalization
     #if norm == "True":
@@ -66,7 +64,6 @@ for i in range(start_batch, len(tra_val_tes)):
     #spaceNNtime
     model             = load_network(input_shape = input.shape[0], output_shape = output.shape[1])
     weights_file_name = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models/group{i}_weights.hdf5".format(sim = sim, exp = exp, i = i)
-
 
     checkpointer, earlystop, reducelr = load_callbacks(weights_file_name)
 

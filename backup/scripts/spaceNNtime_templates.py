@@ -145,7 +145,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
         if gl > 1 and gl < metadata.shape[0]-1 and len(v.alleles) < 3 and np.random.binomial(1, snp):
             if typ == "gt":
                 gm.append(v.genotypes.reshape(-1, 2).sum(axis = 1).tolist())
-            elif typ in ["gl", "gl_mix", "gp", "gp_mix"]:
+            elif typ in ["gl", "gl_mix", "gp", "gp_mix", "gl_gt"]:
                 gm.append(v.genotypes.tolist())
     gm = np.array(gm)
     if typ == "gt":
@@ -173,7 +173,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
             GLmix.append(np.dstack((minGLidx[i::GL.shape[1]], midGLval[i::GL.shape[1]])).flatten().tolist())
         GLmix = np.array(GLmix)
 
-        return GLmix
+        return GLmix.T
     elif typ == "gp_mix":
         arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
@@ -199,18 +199,28 @@ def get_input(ts, metadata, snp, typ, cov, err):
             GPmix.append(np.dstack((minGPidx[i::GP.shape[1]], midGPval[i::GP.shape[1]])).flatten().tolist())
         GPmix = np.array(GPmix)
 
-        return GPmix
+        return GPmix.T
     elif typ == "gl":
         arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
-        return GL.transpose((1, 0, 2)).reshape(-1).reshape(GL.shape[1], GL.shape[0]*3)
+        return GL.transpose((1, 0, 2)).reshape(-1).reshape(GL.shape[1], GL.shape[0]*3).T
     elif typ == "gp":
         arc        = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL         = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
         likelihood = np.exp(-GL)
         prior      = np.array([1/4, 1/2, 1/4])
         GP         = likelihood*prior/(np.sum(likelihood*prior, axis = 2).reshape(GL.shape[:2] + (1,)))
-        return GP.transpose((1, 0, 2)).reshape(-1).reshape(GP.shape[1], GP.shape[0]*3)
+        return GP.transpose((1, 0, 2)).reshape(-1).reshape(GP.shape[1], GP.shape[0]*3).T
+    elif typ == "gl_gt":
+        arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
+        GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
+        
+        minGLidx = np.argsort(GL)[:, :, 0]
+        
+        missing  = ((GL == 0).sum(axis = 2) == 3)
+        minGLidx[missing] = -1
+
+        return minGLidx
 
 def get_output(pre, metadata):
     '''

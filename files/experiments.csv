@@ -28,3 +28,7 @@ europe;26;gp;4;1500;1;sNNt;gp;30;0.05;256;2g;normal;08:00:00
 europe;27;gp_mix;4;1500;1;sNNt;gp_mix;5;0.05;256;2g;normal;08:00:00
 europe;28;gp_mix;4;1500;1;sNNt;gp_mix;15;0.05;256;2g;normal;08:00:00
 europe;29;gp_mix;4;1500;1;sNNt;gp_mix;30;0.05;256;2g;normal;08:00:00
+europe;30;gl_gt;4;1500;1;sNNt;gl_gt;1;0.05;256;2g;normal;08:00:00
+europe;31;gl_gt;4;1500;1;sNNt;gl_gt;5;0.05;256;2g;normal;08:00:00
+europe;32;gl_gt;4;1500;1;sNNt;gl_gt;15;0.05;256;2g;normal;08:00:00
+europe;33;gl_gt;4;1500;1;sNNt;gl_gt;30;0.05;256;2g;normal;08:00:00
