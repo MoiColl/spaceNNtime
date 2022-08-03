@@ -39,6 +39,7 @@ else:
 print("input shape:", input.shape)
 prev_time = time.time()
 for i in range(start_batch, len(tra_val_tes)):
+    i = str(i)
     print("Processing batch {}".format(i), flush = True)
     #Normalization
     #if norm == "True":
