@@ -257,7 +257,7 @@ def Znorm(a, mean, std):
 def load_callbacks(weights_file_name):
     checkpointer=tf.keras.callbacks.ModelCheckpoint(
                       filepath=weights_file_name,
-                      verbose=False,
+                      verbose=0,
                       save_best_only=True,
                       save_weights_only=True,
                       monitor="val_loss",
@@ -265,16 +265,12 @@ def load_callbacks(weights_file_name):
 
     earlystop=tf.keras.callbacks.EarlyStopping(monitor="val_loss",
                                                min_delta=0,
-                                               patience=100)
+                                               patience=100,
+                                               verbose=1)
     
     reducelr=tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss',
                                                   factor=0.5,
-                                                  patience=int(100/6),
-                                                  verbose=False,
-                                                  mode='auto',
-                                                  min_delta=0,
-                                                  cooldown=0,
-                                                  min_lr=0)
+                                                  patience=20)
     return checkpointer,earlystop,reducelr
 
 
@@ -282,22 +278,26 @@ def load_callbacks(weights_file_name):
 def load_network(input_shape, output_shape, dropout_prop = 0.25, nlayers = 10, width = 256):
     from tensorflow.keras import backend as K
     def euclidean_distance_loss(y_true, y_pred):                              #Computes euclidian distance between coordinates
-        return K.sqrt(K.sum(K.square(y_pred - y_true),axis=-1))
+        return K.sqrt(K.sum(K.square(y_pred - y_true), axis=-1))
     
     model = tf.keras.Sequential()                                             #Start a fully connected neural network
     
-    
+    #TODO: create a Normalization layer to normalize the input
+    #DNN_normalizer = tf.keras.layers.Normalization(input_shape=[train_features.shape[1], ], axis= -1)
+    #DNN_normalizer.adapt(train_features)
+    #DNN_model = build_and_compile_model(DNN_normalizer)
     #model.add(tf.keras.layers.BatchNormalization(input_shape=(input_shape,))) #Normalization of the input
-    
     
     for i in range(int(np.floor(nlayers/2))):
         model.add(tf.keras.layers.Dense(width, activation="elu"))             #Half layers fully connected (elu)
-        
+        #model.add(tf.keras.layers.BatchNormalization(input_shape=(width,)))
+
     model.add(tf.keras.layers.Dropout(dropout_prop))                          #Perform dropout
     
     for i in range(int(np.ceil(nlayers/2))):
         model.add(tf.keras.layers.Dense(width, activation="elu"))             #The other half of fully connected layers (elu)
-    
+        #model.add(tf.keras.layers.BatchNormalization(input_shape=(width,)))
+        
     model.add(tf.keras.layers.Dense(output_shape))                                       #One layer with two nodes
     
     model.add(tf.keras.layers.Dense(output_shape))                                       #Another layer with two nodes

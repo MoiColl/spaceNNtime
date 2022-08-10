@@ -8,6 +8,7 @@ sandbox/*/*/tra_val_tes_*.json
 sandbox/*/*/carryon.txt
 .gwf/
 .gwfconf.json
+.gwf/slurm-backend-tracked.json
 backup/scripts/slendr/
 backup/scripts/simGL/
 **/.DS_Store
