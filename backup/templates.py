@@ -3,7 +3,7 @@ from gwf import Workflow
 
 #B. Templates
 ##B.1.
-def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, err, nod, mem, que, tim):
+def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, err, los, nfe, nla, wti, wsp, wsa, nod, mem, que, tim):
 	'''
 	Runs spaceNNtime for simulated data
 	'''
@@ -16,18 +16,21 @@ def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, err, nod, mem, que, 
 		options['gres']   = "gpu:1"
 	spec = '''
 	source /home/moicoll/.bash_profile
-	conda activate sNNt_au3
+	conda activate sNNt_au
 	
-	echo "JOBID:" $PBS_JOBID
+	echo "JOBID            : " $PBS_JOBID
+	echo "HOSTNAME         : " $HOSTNAME
+	echo "CONDA_DEFAULT_ENV: " $CONDA_DEFAULT_ENV
 	
 	mkdir -p /home/moicoll/spaceNNtime/sandbox/completed
 	mkdir -p /home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models
 	mkdir -p /home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots
 
-	python /home/moicoll/spaceNNtime/scripts/spaceNNtime_sim.py {sim} {exp} {nam} {met} {snp} {pre} {typ} {cov} {err} {nod}
+	python /home/moicoll/spaceNNtime/scripts/spaceNNtime_sim.py {sim} {exp} {nam} {met} {snp} {pre} {typ} {cov} {err} {los} {nfe} {nla} {wti} {wsp} {wsa} {nod}
 
 	touch /home/moicoll/spaceNNtime/sandbox/completed/{sim}_{exp}.DONE
-	'''.format(sim = sim, exp = exp, nam = nam, met = met, snp = snp, pre = pre, typ = typ, cov = cov, err = err, nod = nod)
+	'''.format(sim = sim, exp = exp, nam = nam, met = met, snp = snp, pre = pre, typ = typ, cov = cov, 
+	           err = err, los = los, nfe = nfe, nla = nla, wti = wti, wsp = wsp, wsa = wsa, nod = nod)
 
 
 	return inputs, outputs, options, spec

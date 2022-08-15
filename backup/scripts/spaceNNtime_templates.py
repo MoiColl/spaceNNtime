@@ -4,9 +4,9 @@ import pandas     as pd
 import os
 import sys
 import json
-#import yaml
 from matplotlib  import pyplot as plt
 import tensorflow as tf
+from tensorflow.keras import backend as K
 import simGL
 
 #B. Functions
@@ -245,155 +245,177 @@ def get_output(pre, metadata):
     else:
         sys.exit("Incorrect prediction value {}\n".format(pre))
 
-#B.4
-def mean_sd_Znorm(a):
-    return a.mean(), a.std()
+def carryon(carryon_file):
+    if os.path.exists(carryon_file):
+        f = open(carryon_file, "r")
+        start_batch = int(f.read())+1
+        new_file    = False
+        print("Batches up to {} already run. Starting from there...\n".format(start_batch-1))
+    else:
+        start_batch = 0
+        new_file    = True
+        print("No batches run yet. Starting form first batch...\n")
+    return start_batch, new_file
 
-#B.5
-def Znorm(a, mean, std):
-    return (a-mean)/std
+def normalizer(nor, input_shape):
+    if nor == "None":
+        return tf.keras.layers.Normalization(input_shape=[input_shape, ], axis = None, mean = 0, variance = 1)
+    elif nor == "Norm0":
+        return tf.keras.layers.Normalization(input_shape=[input_shape, ], axis = None)
+    elif nor == "Norm1":
+        return tf.keras.layers.Normalization(input_shape=[input_shape, ], axis = -1)
 
 #B.6
-def load_callbacks(weights_file_name):
-    checkpointer=tf.keras.callbacks.ModelCheckpoint(
-                      filepath=weights_file_name,
-                      verbose=0,
-                      save_best_only=True,
-                      save_weights_only=True,
-                      monitor="val_loss",
-                      save_freq="epoch")
+def callbacks(weights_file_name):
+    checkpoint=tf.keras.callbacks.ModelCheckpoint(
+        filepath          = weights_file_name,
+        verbose           = 0,
+        save_best_only    = True,
+        save_weights_only = True,
+        monitor           = "val_loss",
+        save_freq         = "epoch")
 
-    earlystop=tf.keras.callbacks.EarlyStopping(monitor="val_loss",
-                                               min_delta=0,
-                                               patience=100,
-                                               verbose=1)
+    earlystop=tf.keras.callbacks.EarlyStopping(
+        monitor   = "val_loss",
+        min_delta = 0,
+        patience  = 100,
+        verbose   = 1)
     
-    reducelr=tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss',
-                                                  factor=0.5,
-                                                  patience=20)
-    return checkpointer,earlystop,reducelr
+    reducelr=tf.keras.callbacks.ReduceLROnPlateau(
+        monitor  = 'val_loss',
+        factor   = 0.5,
+        patience = 20)
+    return checkpoint, earlystop, reducelr
 
+#B.7
+def euclidean_distance_loss(y_true, y_pred):
+    return K.sqrt(K.sum(K.square(y_pred - y_true), axis = -1))
+#B.8
+def mean_squared_error(y_true, y_pred):
+    return K.mean(K.square(y_pred - y_true), axis = -1)
 
-#B.5
-def load_network(input_shape, output_shape, dropout_prop = 0.25, nlayers = 10, width = 256):
-    from tensorflow.keras import backend as K
-    def euclidean_distance_loss(y_true, y_pred):                              #Computes euclidian distance between coordinates
-        return K.sqrt(K.sum(K.square(y_pred - y_true), axis=-1))
-    
-    model = tf.keras.Sequential()                                             #Start a fully connected neural network
-    
-    #TODO: create a Normalization layer to normalize the input
-    #DNN_normalizer = tf.keras.layers.Normalization(input_shape=[train_features.shape[1], ], axis= -1)
-    #DNN_normalizer.adapt(train_features)
-    #DNN_model = build_and_compile_model(DNN_normalizer)
-    #model.add(tf.keras.layers.BatchNormalization(input_shape=(input_shape,))) #Normalization of the input
-    
-    for i in range(int(np.floor(nlayers/2))):
-        model.add(tf.keras.layers.Dense(width, activation="elu"))             #Half layers fully connected (elu)
-        #model.add(tf.keras.layers.BatchNormalization(input_shape=(width,)))
+#B.9
+def tf_atan2(y, x):
+    angle = tf.where(tf.greater(x,0.0), tf.atan(y/x), tf.zeros_like(x))
+    angle = tf.where(tf.logical_and(tf.less(x,0.0),  tf.greater_equal(y,0.0)), tf.atan(y/x) + np.pi, angle)
+    angle = tf.where(tf.logical_and(tf.less(x,0.0),  tf.less(y,0.0)), tf.atan(y/x) - np.pi, angle)
+    angle = tf.where(tf.logical_and(tf.equal(x,0.0), tf.greater(y,0.0)), 0.5*np.pi * tf.ones_like(x), angle)
+    angle = tf.where(tf.logical_and(tf.equal(x,0.0), tf.less(y,0.0)), -0.5*np.pi * tf.ones_like(x), angle)
+    angle = tf.where(tf.logical_and(tf.equal(x,0.0), tf.equal(y,0.0)), np.nan * tf.zeros_like(x), angle)
+    return angle
 
-    model.add(tf.keras.layers.Dropout(dropout_prop))                          #Perform dropout
-    
-    for i in range(int(np.ceil(nlayers/2))):
-        model.add(tf.keras.layers.Dense(width, activation="elu"))             #The other half of fully connected layers (elu)
-        #model.add(tf.keras.layers.BatchNormalization(input_shape=(width,)))
-        
-    model.add(tf.keras.layers.Dense(output_shape))                                       #One layer with two nodes
-    
-    model.add(tf.keras.layers.Dense(output_shape))                                       #Another layer with two nodes
-    
-    model.compile(optimizer="Adam",
-                  loss=euclidean_distance_loss)
+#B.10
+def tf_haversine(latlon1, latlon2):
+    lat1 = latlon1[:, 0]
+    lon1 = latlon1[:, 1]
+    lat2 = latlon2[:, 0]
+    lon2 = latlon2[:, 1]
+
+    REarth = 6371
+    lat = tf.abs(lat1 - lat2) * np.pi / 180
+    lon = tf.abs(lon1 - lon2) * np.pi / 180
+    lat1 = lat1 * np.pi / 180
+    lat2 = lat2 * np.pi / 180
+    a = tf.sin(lat / 2) * tf.sin(lat / 2) + tf.cos(lat1) * tf.cos(lat2) * tf.sin(lon / 2) * tf.sin(lon / 2)
+    d = 2 * tf_atan2(tf.sqrt(a), tf.sqrt(1 - a))
+    return REarth * d
+
+#B.11
+def haversine_distance_time_difference(w_space = 1, w_time = 1, w_sample = np.array(1)):
+    '''
+    https://medium.com/@Bloomore/how-to-write-a-custom-loss-function-with-additional-arguments-in-keras-5f193929f7a0
+    '''
+    def loss(y_true, y_pred):
+        err_space = tf_haversine(y_true[:, 0:2], y_pred[:, 0:2])*w_space
+        err_time  = mean_squared_error(tf.reshape(y_true[:, 2], (-1, 1)), tf.reshape(y_pred[:, 2], (-1, 1)))*w_time
+        return K.mean(tf.transpose(tf.reshape(K.concatenate((err_space, err_time)), (2, -1)))*w_sample.reshape(-1, 1), axis=-1)
+    return loss
+
+#B.12
+def dense_batchnorm_activation(model, l, n):
+    for _ in range(l):
+        model.add(tf.keras.layers.Dense(n))
+        model.add(tf.keras.layers.BatchNormalization())
+        model.add(tf.keras.layers.Activation('elu'))
+
+#B.13
+def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256, loss_function = "edl", w_time = 1, w_space = 1, w_sample = np.array(1)):
+    model = tf.keras.Sequential()                                             # Start a fully connected neural network
+    model.add(norm)                                                           # Add a normalization layer
+    dense_batchnorm_activation(model, l = int(np.floor(l/2)), n = n)        # Add half of the desired layers
+    model.add(tf.keras.layers.Dropout(dropout_prop))                          # Add a drop out layer
+    dense_batchnorm_activation(model, l = int(np.ceil(l/2)), n = n)           # Add the rest of the desired layers
+    [model.add(tf.keras.layers.Dense(output_shape)) for _ in range(2)]        # Add two extra layers for the output
+
+    if loss_function == "edl":                                                # Compile the model deciding on the loss function and the optimizer
+        model.compile(optimizer="Adam", loss=euclidean_distance_loss)
+    elif loss_function == "hdtd":
+        model.compile(optimizer="Adam", loss=haversine_distance_time_difference(w_time = w_time, w_space = w_space, w_sample = w_sample))
+    elif loss_function == "hd":
+        model.compile(optimizer="Adam", loss=tf_haversine)
+    elif loss_function == "mse":
+        model.compile(optimizer="Adam", loss=mean_squared_error)
     return model
 
 
 #B.6
-def train_network(model, tra_aco, val_aco, tra_loc, val_loc, weights_file_name, checkpointer, earlystop, reducelr):
-    history = model.fit(tra_aco, tra_loc,
-                        epochs=5000,
-                        batch_size=32,
-                        shuffle=True,
-                        verbose=False,
-                        validation_data=(val_aco, val_loc),
-                        callbacks=[checkpointer,earlystop,reducelr])
+def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks):
+    history = model.fit(x               = tra_fea, 
+                        y               = tra_lab,
+                        epochs          = 5000,
+                        batch_size      =   32,
+                        shuffle         = True,
+                        verbose         = False,
+                        validation_data = (val_fea, val_lab),
+                        callbacks       = callbacks)
     
-    model.load_weights(weights_file_name)
-    
-    return history, model
-
-
+    return history
 
 #B.7
-def plot_history(history, fig_path):
-    
-    fig= plt.figure()
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'validation'], loc='upper right')
-    fig.savefig(fig_path)
-    plt.close()
-
-
-#B.8
-def pred(model, tes_aco):
-    return model.predict_step(tes_aco)
-     #model.predict(tes_aco)  
+def plot_loss(history, fig_path = None):
+    hist = pd.DataFrame(history.history)
+    hist['epoch'] = history.epoch
+    if fig_path:
+        fig  = plt.figure()
+    plt.axvline(x = int(hist[np.min(hist["val_loss"]) == hist["val_loss"]]["epoch"]), c = "red", alpha = 0.5, linestyle = "dashed", label='Early Stop')
+    plt.plot(history.history['loss'], label='Train')
+    plt.plot(history.history['val_loss'], label='Validation')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+    if fig_path:
+        fig.savefig(fig_path)
+        plt.close()
 
 #B.9
-def write_pred(samples, i, tes, n_snps, tes_loc, predict, means, stds, new_file, file_name, sim, exp, nam, pre, typ, run):
+def write_pred(sim, exp, nam, typ, gro, ind, idx, snp, run, pre, true, pred, new_file, file_name):
+
     df1 = pd.DataFrame({
-       "sim"                 : sim,
-       "exp"                 : exp,
-       "nam"                 : nam, 
-       "ind"                 : samples[tes],
-       "typ"                 : typ,
-       "group"               : i,
-       "index"               : tes,
-       "n_snps"              : n_snps,
-       "run_time"            : run,
+       "sim" : sim,
+       "exp" : exp,
+       "nam" : nam,
+       "typ" : typ,
+       "gro" : gro,
+       "ind" : ind,
+       "idx" : idx,
+       "snp" : snp,
+       "run" : run,
        })
 
-    if pre == "sNNt":
-        df2 = pd.DataFrame({
-            "real_latitude_norm"  : tes_loc[:, 0],
-            "real_longitude_norm" : tes_loc[:, 1],
-            "real_time_norm"      : tes_loc[:, 2],
-            "pred_latitude_norm"  : predict[:, 0],
-            "pred_longitude_norm" : predict[:, 1],
-            "pred_time_norm"      : predict[:, 2],
-            "real_latitude"       : (tes_loc[:, 0]*stds[0])+means[0],
-            "real_longitude"      : (tes_loc[:, 1]*stds[1])+means[1],
-            "real_time"           : (tes_loc[:, 2]*stds[2])+means[2],
-            "pred_latitude"       : (predict[:, 0]*stds[0])+means[0],
-            "pred_longitude"      : (predict[:, 1]*stds[1])+means[1],
-            "pred_time"           : (predict[:, 2]*stds[2])+means[2]
-       })
-    
-    elif pre == "space":
-        df2 = pd.DataFrame({
-            "real_latitude_norm"  : tes_loc[:, 0],
-            "real_longitude_norm" : tes_loc[:, 1],
-            "pred_latitude_norm"  : predict[:, 0],
-            "pred_longitude_norm" : predict[:, 1],
-            "real_latitude"       : (tes_loc[:, 0]*stds[0])+means[0],
-            "real_longitude"      : (tes_loc[:, 1]*stds[1])+means[1],
-            "pred_latitude"       : (predict[:, 0]*stds[0])+means[0],
-            "pred_longitude"      : (predict[:, 1]*stds[1])+means[1]
-        })
+    df2 = {}
+    if pre in ["sNNt", "space"]:
+        df2["true_lat"]   = true[:, 0]
+        df2["true_lon"]   = true[:, 1]
+        df2["pred_lat"]   = pred[:, 0]
+        df2["pred_lon"]   = pred[:, 1]
+        df2["diff_space"] = np.array(tf_haversine(true[:, 0:2].astype('float32'), pred[:, 0:2].astype('float32')))
 
-    elif pre == "time":
-        df2 = pd.DataFrame({
-            "real_time_norm"  : tes_loc[:, 0],
-            "pred_time_norm"  : predict[:, 0],
-            "real_time"       : (tes_loc[:, 0]*stds[0])+means[0],
-            "pred_time"       : (predict[:, 0]*stds[0])+means[0]
-        })
-
-    else:
-        sys.exit("pre variable not correct!. It can only be sNNt, time or space and it is {}\n".format(pre))
+    if pre in ["sNNt", "time"]:
+        df2["true_tim"]  = true[:, 2]
+        df2["pred_tim"]  = pred[:, 2]
+        df2["diff_time"] = true[:, 2]-pred[:, 2]
+    df2 = pd.DataFrame(df2)
 
     df = pd.concat([df1, df2], axis=1)
 
@@ -402,380 +424,3 @@ def write_pred(samples, i, tes, n_snps, tes_loc, predict, means, stds, new_file,
     else:
         df.to_csv(file_name, mode='a', header=False, sep = "\t", index = False)
     return False
-
-##B.3
-#def deal_with_missing_vec(f_arr, n_missing_arr):
-#    '''
-#    Def:
-#        For a series of sites, it returns all the imputed genotypes as a single 1d array
-#    Input:
-#        - f_arr         : An array for every SNP with missing genotypes with the fraction of allele 1
-#        - n_missing_arr : An array for every SNP with missing genotypes with the number of inidivudals with missing genotypes
-#    Output:
-#        - numpy array (1d) with all the missing genotypes
-#    '''
-#    genotypes = []
-#    for f, n_missing in zip(f_arr, n_missing_arr):
-#        genotypes += deal_with_missing(f, n_missing)
-#    return np.array(genotypes, dtype="int8")
-#
-##B.4
-#def impute_missing_data(genotypes, missing, count_alleles):
-#    '''
-#    Input:
-#        - genotypes : genotype array with missing genotypes
-#    Output:
-#        - genotypes : genotype array with no missing genotypes
-#    '''
-#    genotypes[missing] = deal_with_missing_vec(count_alleles[:, 0]/np.sum(count_alleles, axis = 1), np.sum(missing, axis = 1))
-#    
-#    return genotypes
-#
-#
-##B.5
-#def deal_with_missing(f, n_missing):
-#    '''
-#    Def:
-#        For a given SNP with a certain number individuals with missing genotype and an allele fraction f, it returns
-#        imputed genotypes for those individuals.
-#    Input: 
-#        - f         : Fraction of allele 0
-#        - n_missing : number of individuals with missing genotype
-#    Output:
-#        - list with inputed missing alleles
-#
-#    '''
-#    c = {0 : [0, 0],
-#         1 : [0, 1],
-#         2 : [1, 1]}
-#    return [c[x] for x in np.random.binomial(2, f, n_missing)]
-#
-##B.6
-#def get_GLdict(n_alt):
-#    '''
-#    Def:
-#        It first create a dictionary (c) with the genotype index with the value equal to the sorted position that correspond in the 
-#        GL matrix (00 : 0, 01 : 1, 11 : 2, 02 : 3, 12, 22...). Then, knowing this info, it creates a two level dictionary, each level
-#        corresponding to the allele index, that returns a list with the indeces in the GL matrix that must be taken to get the correct
-#        GL given two allele indeces. 
-#    Input:
-#        - n_alt : number of alternative alleles
-#    Output: 
-#        - z     :  
-#    '''
-#    c = defaultdict(lambda : None)
-#    z = defaultdict(lambda : defaultdict(lambda : []))
-#    i = 0
-#    for x in range(n_alt):
-#        for y in range(x+1):
-#            c[str(y)+str(x)] = i
-#            i+=1
-#
-#    for x in range(n_alt):
-#        for y in range(0, x):
-#            z[y][x].append(c[str(y)+str(y)])
-#            z[y][x].append(c[str(y)+str(x)])
-#            z[y][x].append(c[str(x)+str(x)])
-#
-#    return z
-#
-##B.7 
-#def get_filters_and_index(callset, chrom, start, end):
-#    '''
-#    Def:
-#        It checks which SNPs (given a chromosome and a start and end index) are biallelic and singletons and computes 
-#        the count_alleles and the allele_index for those SNPs that are biallelic and not singletons.
-#    Input:
-#        - callset : zarr callset variable
-#        - chrom   : chromosome 
-#        - start   : start index (not genomic position)
-#        - end     : ending index (not genomic position)
-#    Output:
-#        - filterp       : boolean np array (n_SNPs, ) with information if a SNP passes the SNP filter or not
-#        - biallel       : boolean np array (filterp n_SNPs, ) with information if a SNP is biallelic or not
-#        - singlet       : boolean np array (biallelic SNPs, ) with information if a biallelic SNP is not singleton (True) or it is (False)
-#        - count_alleles : np array (n_SNPs, n_alleles) with the counts of alleles for each SNP counting all individuals
-#        - allele_index  : np array (n_SNPs, 2) with the index of the allele index that it's counts are > 0 (because we are looking at biallelic positions, we 
-#                          only have to look at 2 positions)
-#    '''
-#
-#    filterp       = callset['{}/variants/FILTER_PASS'.format(chrom)][start:end]
-#    
-#    biallel       = (allel.GenotypeDaskArray(callset['{}/calldata/GT'.format(chrom)])
-#                         .take(np.arange(start, end), axis = 0)
-#                         .compress(filterp, axis=0)
-#                         .count_alleles()
-#                         .is_biallelic()
-#                         .compute())
-#    
-#    singlet       = ~(allel.GenotypeDaskArray(callset['{}/calldata/GT'.format(chrom)])
-#                         .take(np.arange(start, end), axis = 0)
-#                         .compress(filterp, axis=0)
-#                         .compress(biallel, axis=0)
-#                         .count_alleles()
-#                         .is_singleton()
-#                         .compute())
-#
-#    count_alleles = (allel.GenotypeDaskArray(callset['{}/calldata/GT'.format(chrom)])
-#                         .take(np.arange(start, end), axis = 0)
-#                         .compress(filterp, axis=0)
-#                         .compress(biallel, axis=0)
-#                         .compress(singlet, axis=0)
-#                         .count_alleles()
-#                         .compute())
-#        
-#    allele_index  = np.where(count_alleles != 0)[1].reshape(-1, 2) # array with the index of the alleles segregating in the population
-#
-#    return filterp, biallel, singlet, count_alleles, allele_index
-#
-#
-#
-#
-##B.8
-#def create_nninput(callset, chrom, start_pos_idx, end_pos_idx, pos, input_type, noncall = -1):
-#    '''
-#    Def:
-#        This function will output the genotype or genotype likelihoods and position array for those SNPs that are biallelic and are not singletons.
-#        If genotypes are requested, the missing genotypes are going to be inputed and only the allele counts with the minimum allele index (ref : 0,
-#        alt1 : 1, alt2 : 2...) will be kept since keeping the allele counts for both alleles is redundant.
-#        If genotype likelihoods are requested, 3 genotype likelihoods (homo x 2, hetero) are going to be outputed for each SNP. In this case, no
-#        imputing is performed.
-#
-#    Input:
-#        - callset       : scikit allel callset valriable
-#        - chrom         : chromosome
-#        - start_pos_idx : starting position index
-#        - end_pos_idx   : ending position index
-#        - pos           : position SortedIndex() allel list of the window to be examined
-#        - input_type    : "ac" : alternative allele counts ;"gl" : 3 genotype likelyhoods; or "gl_mix": allele count and the second most likely genotype likelyhood.        - noncall       : How the missing data is encoded. Either 0 or -1.
-#    Output: 
-#        - nninput               : np array with dimentions (n_SNPs, n_ind) if genotypes, (n_SNPs x 3, n_ind) if genotype likelihoods
-#        - pos[biallel][singlet] : SNP genomic possitions that are biallelic and not singletons 
-#    '''
-#    filterp, biallel, singlet, count_alleles, allele_index = get_filters_and_index(callset, chrom, start_pos_idx, end_pos_idx)
-#    
-#    mapping = np.full(count_alleles.shape, -1)
-#    mapping[np.arange(count_alleles.shape[0]), allele_index[:, 0]] = np.full(count_alleles.shape[0], 0)
-#    mapping[np.arange(count_alleles.shape[0]), allele_index[:, 1]] = np.full(count_alleles.shape[0], 1)
-#
-#    genotypes = (allel.GenotypeDaskArray(callset['{}/calldata/GT'.format(chrom)])
-#                             .take(np.arange(start_pos_idx, end_pos_idx), axis = 0)
-#                             .compress(filterp, axis=0)
-#                             .compress(biallel, axis=0)
-#                             .compress(singlet, axis=0)
-#                             .map_alleles(mapping)
-#                             .compute())
-#    
-#    missing   = genotypes.is_missing()
-#
-#    
-#    if input_type == "gl" or input_type == "gl_mix":
-#
-#        GLd      = get_GLdict(8)
-#        genolike = None
-#        w        = int(np.ceil((end_pos_idx-start_pos_idx)/4))
-#
-#        for s in range(start_pos_idx, end_pos_idx, w):
-#            if s+w < end_pos_idx:
-#                e = s+w
-#            else:
-#                e = end_pos_idx
-#
-#            filterp_sub, biallel_sub, singlet_sub, _, allele_index_sub = get_filters_and_index(callset, chrom, s, e)
-#
-#            GL_index = np.array([GLd[allele_index_sub[i][0]][allele_index_sub[i][1]] for i in range(allele_index_sub.shape[0])])
-#
-#            n_pos    = GL_index.shape[0]
-#            n_ind    = callset['{}/samples'.format(chrom)].shape[0]
-#            n_gl     = GL_index.shape[1]
-#            
-#            
-#            
-#            genolike_sub = (callset['{}/calldata/PL'.format(chrom)][s:e, :, :][filterp_sub][biallel_sub][singlet_sub][np.repeat(np.arange(n_pos), n_ind*n_gl), np.repeat(np.tile(np.arange(n_ind), n_pos), n_gl), np.tile(GL_index, n_ind).reshape(-1)]
-#                                    .reshape(n_pos, n_ind, n_gl))
-#            
-#            if noncall == 0:
-#                genolike_sub[genolike_sub == -1] = 0 
-#
-#            if type(genolike) == type(None):
-#                genolike = genolike_sub
-#            else:
-#                genolike = np.concatenate((genolike, genolike_sub), axis = 0)
-#                
-#        genolike[missing] = noncall
-#                
-#        if input_type == "gl_mix":
-#            ac           = np.full((genotypes.shape[0], genotypes.shape[1]), noncall)   
-#            ac[~missing] = genotypes.to_allele_counts()[:, :, 0][~missing]
-#            ac           = ac.reshape(genotypes.shape[0], genotypes.shape[1], 1)
-#            
-#            median       = np.median(genolike, axis = 2).reshape(genolike.shape[0], genolike.shape[1], 1)
-#            
-#            genolike_mix = np.concatenate((median, ac), axis = 2)
-#    
-#    if   input_type == "ac":
-#        return impute_missing_data(genotypes, missing, count_alleles).to_allele_counts()[:, :, 0], pos[filterp][biallel][singlet]
-#    elif input_type == "gl":
-#        return genolike.transpose(0, 2, 1).reshape(-1, n_ind),                      pos[filterp][biallel][singlet]
-#    elif input_type == "gl_mix":
-#        return genolike_mix.transpose(0, 2, 1).reshape(-1, n_ind),                  pos[filterp][biallel][singlet]
-#    else:
-#        sys.exit("No such inputtype: {}".format(input_type))
-#
-#
-##B.9
-#def load_callbacks(weights_file_name):
-#    checkpointer=tf.keras.callbacks.ModelCheckpoint(
-#                      filepath=weights_file_name,
-#                      verbose=False,
-#                      save_best_only=True,
-#                      save_weights_only=True,
-#                      monitor="val_loss",
-#                      save_freq="epoch")
-#
-#    earlystop=tf.keras.callbacks.EarlyStopping(monitor="val_loss",
-#                                               min_delta=0,
-#                                               patience=100)
-#    
-#    reducelr=tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss',
-#                                                  factor=0.5,
-#                                                  patience=int(100/6),
-#                                                  verbose=False,
-#                                                  mode='auto',
-#                                                  min_delta=0,
-#                                                  cooldown=0,
-#                                                  min_lr=0)
-#    return checkpointer,earlystop,reducelr
-#
-#
-##B.10
-#def load_network(input_shape, dropout_prop = 0.25, nlayers = 10, width = 256):
-#    from tensorflow.keras import backend as K
-#    def euclidean_distance_loss(y_true, y_pred):                              #Computes euclidian distance between coordinates
-#        return K.sqrt(K.sum(K.square(y_pred - y_true),axis=-1))
-#    
-#    model = tf.keras.Sequential()                                             #Start a fully connected neural network
-#    
-#    
-#    model.add(tf.keras.layers.BatchNormalization(input_shape=(input_shape,))) #Normalization of the input
-#    
-#    
-#    for i in range(int(np.floor(nlayers/2))):
-#        model.add(tf.keras.layers.Dense(width, activation="elu"))             #Half layers fully connected (elu)
-#        
-#    model.add(tf.keras.layers.Dropout(dropout_prop))                          #Perform dropout
-#    
-#    for i in range(int(np.ceil(nlayers/2))):
-#        model.add(tf.keras.layers.Dense(width, activation="elu"))             #The other half of fully connected layers (elu)
-#    
-#    model.add(tf.keras.layers.Dense(2))                                       #One layer with two nodes
-#    
-#    model.add(tf.keras.layers.Dense(2))                                       #Another layer with two nodes
-#    
-#    model.compile(optimizer="Adam",
-#                  loss=euclidean_distance_loss)
-#    return model
-#
-##B.11
-#def train_network(model, tra_aco, val_aco, tra_loc, val_loc, weights_file_name, checkpointer, earlystop, reducelr):
-#    history = model.fit(tra_aco, tra_loc,
-#                        epochs=5000,
-#                        batch_size=32,
-#                        shuffle=True,
-#                        verbose=False,
-#                        validation_data=(val_aco, val_loc),
-#                        callbacks=[checkpointer,earlystop,reducelr])
-#    
-#    model.load_weights(weights_file_name)
-#    
-#    return history, model
-#
-##B.12
-#def pred(model, tes_aco):
-#    return model.predict_step(tes_aco)
-#     #model.predict(tes_aco)  
-#
-##B.13
-#def plot_history(history, fig_path):
-#    
-#    fig= plt.figure()
-#    plt.plot(history.history['loss'])
-#    plt.plot(history.history['val_loss'])
-#    plt.title('model loss')
-#    plt.ylabel('loss')
-#    plt.xlabel('epoch')
-#    plt.legend(['train', 'validation'], loc='upper right')
-#    fig.savefig(fig_path)
-#    plt.close()
-#
-##B.14
-#def dist_degrees(real_lat, pred_lat, real_lon, pred_lon):
-#    '''
-#    Def:
-#        Returns the distance in Km between two geographical points in latitude and longitude degrees using the havershine formula
-#        https://www.movable-type.co.uk/scripts/latlong.html
-#    Input:
-#        - real_lat : real geographical location of a sample in latitude degrees
-#        - pred_lat : predicted geographical location of a sample in latitude degrees
-#        - real_lon : real geographical location of a sample in longuitude degrees
-#        - pred_lon : predicted geographical location of a sample in longuitude degrees
-#    Output:
-#        - Distance between the two points in Km
-#    '''
-#    R        = 6371   #Earth radius in Km
-#
-#    rad_real_lat = real_lat*(np.pi/180) #real latitude in radiants
-#    rad_pred_lat = pred_lat*(np.pi/180) #predicted latitude in radiants
-#    diff_lat = (pred_lat-real_lat)*(np.pi/180) #difference between latitudes in radiants
-#    diff_lon = (pred_lon-real_lon)*(np.pi/180) #difference between longuitudes in radiants
-#    a = np.power(np.sin(diff_lat/2), 2) + (np.cos(rad_real_lat) * np.cos(rad_pred_lat) * np.power(np.sin(diff_lon/2), 2)) #Trigonometry :)
-#    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a))
-#
-#    return R*c
-#
-#
-##B.15
-#def write_data(samples, input_type, i, tra_val_tes, chrom,  s, window, n_snps, tes_loc, predict, std_lat, mean_lat, std_lon, mean_lon, new_file, file_name):
-#    df = pd.DataFrame({
-#        "samples"             : samples[tra_val_tes[i]["tes"]],
-#        "input_type"          : input_type,
-#        "group"               : i,
-#        "index"               : tra_val_tes[i]["tes"],
-#        "chrom"               : chrom,
-#        "start"               : s,
-#        "end"                 : s+window,
-#        "n_snps"              : n_snps,
-#        "real_latitude_norm"  : tes_loc[:, 0],
-#        "real_longitude_norm" : tes_loc[:, 1],
-#        "pred_latitude_norm"  : predict[:, 0],
-#        "pred_longitude_norm" : predict[:, 1],
-#        "real_latitude"       : (tes_loc[:, 0]*std_lat)+mean_lat,
-#        "real_longitude"      : (tes_loc[:, 1]*std_lon)+mean_lon,
-#        "pred_latitude"       : (predict[:, 0]*std_lat)+mean_lat,
-#        "pred_longitude"      : (predict[:, 1]*std_lon)+mean_lon
-#    }).assign(dist = lambda x: dist_degrees(x.real_latitude, x.pred_latitude, x.real_longitude, x.pred_longitude))
-#    if new_file:
-#        df.to_csv(file_name, mode='w', header=True, sep = "\t", index = False)
-#    else:
-#        df.to_csv(file_name, mode='a', header=False, sep = "\t", index = False)
-#    return False
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
