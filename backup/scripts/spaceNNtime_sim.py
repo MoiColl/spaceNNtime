@@ -1,5 +1,4 @@
 import sys
-#import os
 import tskit
 import pandas as pd
 import time
@@ -24,7 +23,7 @@ input         = get_input(ts, metadata, snp, typ, cov, err)
 output        = get_output(pre, metadata)
 print("input shape:", input.shape)
 print(input)
-print("output shape:", input.shape)
+print("output shape:", output.shape)
 print(output)
 
 if wsa == "None":
@@ -68,10 +67,12 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
 
     history = train_spaceNNtime(model     = model, 
                                 tra_fea   = input[:, tra_val_tes[i]["tra"]].T, 
-                                tra_lab   = norm_features(output[tra_val_tes[i]["tra"], :]), 
+                                tra_lab   = norm_labels(output[tra_val_tes[i]["tra"], :]), 
                                 val_fea   = input[:, tra_val_tes[i]["val"]].T, 
                                 val_lab   = norm_labels(output[tra_val_tes[i]["val"], :]),
                                 callbacks = [checkpoint, earlystop, reducelr])
+
+    plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots/group{i}_history.png".format(sim = sim, exp = exp, i = i))
 
     pred = model.predict(input[:, tra_val_tes[i]["tes"]].T)
     

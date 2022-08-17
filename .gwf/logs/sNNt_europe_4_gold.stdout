@@ -1,121 +1,548 @@
-JOBID: 4038407
+JOBID            :  4940028
+HOSTNAME         :  s21n54
+CONDA_DEFAULT_ENV:  sNNt_au
 Which devices are available?
 [name: "/device:CPU:0"
 device_type: "CPU"
 memory_limit: 268435456
 locality {
 }
-incarnation: 10991333222792344543
+incarnation: 590664663037500379
 ]
+input shape: (1344, 1500)
+[[0 0 0 ... 0 0 0]
+ [0 0 0 ... 0 0 0]
+ [0 0 0 ... 0 0 0]
+ ...
+ [0 0 0 ... 0 0 0]
+ [0 0 0 ... 0 0 0]
+ [0 0 0 ... 0 0 0]]
+output shape: (1500, 3)
+[[3.05757414e+01 5.36054544e+01 3.86700000e+03]
+ [5.82851504e+01 3.73355222e+01 4.07600000e+04]
+ [6.28855568e+01 3.78928083e+01 3.53750000e+04]
+ ...
+ [9.06849563e+00 5.11460970e+01 9.90100000e+03]
+ [3.29253557e+01 5.47534622e+01 8.86100000e+03]
+ [6.11433546e+01 3.80293684e+01 3.97470000e+04]]
 Getting travaltes
 Done
-Batches up to 446 already run. Starting from there...
+Batches up to 202 already run. Starting from there...
 
-Processing batch 447
-1.3869192163149515 min
-Processing batch 448
-1.3754923741022747 min
-Processing batch 449
-1.3755382855733236 min
-Processing batch 450
-1.3753760854403179 min
-Processing batch 451
-1.375965960820516 min
-Processing batch 452
-1.3788894176483155 min
-Processing batch 453
-1.3753640532493592 min
-Processing batch 454
-1.3761538545290628 min
-Processing batch 455
-1.3754515488942465 min
-Processing batch 456
-1.3755986412366232 min
-Processing batch 457
-1.3801576375961304 min
-Processing batch 458
-1.3760026216506958 min
-Processing batch 459
-1.375865924358368 min
-Processing batch 460
-1.375594965616862 min
-Processing batch 461
-1.3755618492762247 min
-Processing batch 462
-1.379988960425059 min
-Processing batch 463
-1.3755367080370584 min
-Processing batch 464
-1.3751204013824463 min
-Processing batch 465
-1.3778364022572835 min
-Processing batch 466
-1.3750229636828104 min
-Processing batch 467
-1.3785606304804483 min
-Processing batch 468
-1.3750882267951965 min
-Processing batch 469
-1.3754474202791849 min
-Processing batch 470
-1.374824066956838 min
-Processing batch 471
-1.3743123610814412 min
-Processing batch 472
-1.3783061663309732 min
-Processing batch 473
-1.374844213326772 min
-Processing batch 474
-1.3746949871381124 min
-Processing batch 475
-1.3754323601722718 min
-Processing batch 476
-1.5184568603833517 min
-Processing batch 477
-1.3799903829892477 min
-Processing batch 478
-1.375946851571401 min
-Processing batch 479
-1.3762288292249043 min
-Processing batch 480
-1.3760921796162924 min
-Processing batch 481
-1.3768535812695821 min
-Processing batch 482
-1.3810951789220174 min
-Processing batch 483
-1.3761664787928263 min
-Processing batch 484
-1.3764155387878418 min
-Processing batch 485
-1.3763570706049602 min
-Processing batch 486
-1.3769168734550477 min
-Processing batch 487
-1.3814844648043314 min
-Processing batch 488
-1.3757930795351665 min
-Processing batch 489
-1.3760332703590392 min
-Processing batch 490
-1.3760133107503256 min
-Processing batch 491
-1.3762866139411927 min
-Processing batch 492
-1.3802052974700927 min
-Processing batch 493
-1.3758832335472106 min
-Processing batch 494
-1.3758984565734864 min
-Processing batch 495
-1.3765016595522563 min
-Processing batch 496
-1.3760189255078634 min
-Processing batch 497
-1.3793233076731364 min
-Processing batch 498
-1.3760122338930765 min
-Processing batch 499
-1.3758239507675172 min
-Processing batch 500
-1.3759482940038046 min
+Processing batch 203
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+normalization (Normalization (None, 1344)              0         
+_________________________________________________________________
+dense (Dense)                (None, 256)               344320    
+_________________________________________________________________
+batch_normalization (BatchNo (None, 256)               1024      
+_________________________________________________________________
+activation (Activation)      (None, 256)               0         
+_________________________________________________________________
+dense_1 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_1 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_1 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_2 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_2 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_2 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_3 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_3 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_3 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_4 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_4 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_4 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dropout (Dropout)            (None, 256)               0         
+_________________________________________________________________
+dense_5 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_5 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_5 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_6 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_6 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_6 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_7 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_7 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_7 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_8 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_8 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_8 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_9 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+batch_normalization_9 (Batch (None, 256)               1024      
+_________________________________________________________________
+activation_9 (Activation)    (None, 256)               0         
+_________________________________________________________________
+dense_10 (Dense)             (None, 3)                 771       
+_________________________________________________________________
+dense_11 (Dense)             (None, 3)                 12        
+=================================================================
+Total params: 947,471
+Trainable params: 942,351
+Non-trainable params: 5,120
+_________________________________________________________________
+Restoring model weights from the end of the best epoch.
+Epoch 00261: early stopping
+2.410304609934489 min
+Processing batch 204
+Restoring model weights from the end of the best epoch.
+Epoch 00275: early stopping
+3.4127204537391664 min
+Processing batch 205
+Restoring model weights from the end of the best epoch.
+Epoch 00228: early stopping
+2.4243613680203757 min
+Processing batch 206
+Restoring model weights from the end of the best epoch.
+Epoch 00294: early stopping
+2.4088955402374266 min
+Processing batch 207
+Restoring model weights from the end of the best epoch.
+Epoch 00235: early stopping
+2.413131030400594 min
+Processing batch 208
+Restoring model weights from the end of the best epoch.
+Epoch 00219: early stopping
+2.415572166442871 min
+Processing batch 209
+Restoring model weights from the end of the best epoch.
+Epoch 00244: early stopping
+2.4204437534014382 min
+Processing batch 210
+Restoring model weights from the end of the best epoch.
+Epoch 00218: early stopping
+2.4166314641634625 min
+Processing batch 211
+Restoring model weights from the end of the best epoch.
+Epoch 00271: early stopping
+2.4080240726470947 min
+Processing batch 212
+Restoring model weights from the end of the best epoch.
+Epoch 00248: early stopping
+2.4116137862205504 min
+Processing batch 213
+Restoring model weights from the end of the best epoch.
+Epoch 00348: early stopping
+3.4076208750406902 min
+Processing batch 214
+Restoring model weights from the end of the best epoch.
+Epoch 00247: early stopping
+2.4089617331822715 min
+Processing batch 215
+Restoring model weights from the end of the best epoch.
+Epoch 00198: early stopping
+2.4139716903368633 min
+Processing batch 216
+Restoring model weights from the end of the best epoch.
+Epoch 00273: early stopping
+2.4027130524317424 min
+Processing batch 217
+Restoring model weights from the end of the best epoch.
+Epoch 00244: early stopping
+2.413073174158732 min
+Processing batch 218
+Restoring model weights from the end of the best epoch.
+Epoch 00265: early stopping
+2.4077588081359864 min
+Processing batch 219
+Restoring model weights from the end of the best epoch.
+Epoch 00305: early stopping
+2.4145964980125427 min
+Processing batch 220
+Restoring model weights from the end of the best epoch.
+Epoch 00271: early stopping
+2.414361846446991 min
+Processing batch 221
+Restoring model weights from the end of the best epoch.
+Epoch 00243: early stopping
+2.4067933758099875 min
+Processing batch 222
+Restoring model weights from the end of the best epoch.
+Epoch 00235: early stopping
+2.413201332092285 min
+Processing batch 223
+Restoring model weights from the end of the best epoch.
+Epoch 00251: early stopping
+2.406663179397583 min
+Processing batch 224
+Restoring model weights from the end of the best epoch.
+Epoch 00297: early stopping
+2.415292290846507 min
+Processing batch 225
+Restoring model weights from the end of the best epoch.
+Epoch 00298: early stopping
+2.4144925912221273 min
+Processing batch 226
+Restoring model weights from the end of the best epoch.
+Epoch 00186: early stopping
+1.4066798289616902 min
+Processing batch 227
+Restoring model weights from the end of the best epoch.
+Epoch 00273: early stopping
+2.407250161965688 min
+Processing batch 228
+Restoring model weights from the end of the best epoch.
+Epoch 00368: early stopping
+3.4061896721522014 min
+Processing batch 229
+Restoring model weights from the end of the best epoch.
+Epoch 00199: early stopping
+2.415911098321279 min
+Processing batch 230
+Restoring model weights from the end of the best epoch.
+Epoch 00315: early stopping
+3.4129249413808185 min
+Processing batch 231
+Restoring model weights from the end of the best epoch.
+Epoch 00187: early stopping
+2.402610198656718 min
+Processing batch 232
+Restoring model weights from the end of the best epoch.
+Epoch 00206: early stopping
+2.413293484846751 min
+Processing batch 233
+Restoring model weights from the end of the best epoch.
+Epoch 00356: early stopping
+3.407052493095398 min
+Processing batch 234
+Restoring model weights from the end of the best epoch.
+Epoch 00327: early stopping
+3.415499738852183 min
+Processing batch 235
+Restoring model weights from the end of the best epoch.
+Epoch 00172: early stopping
+1.4127797444661458 min
+Processing batch 236
+Restoring model weights from the end of the best epoch.
+Epoch 00248: early stopping
+2.406409970919291 min
+Processing batch 237
+Restoring model weights from the end of the best epoch.
+Epoch 00222: early stopping
+2.4114160259564716 min
+Processing batch 238
+Restoring model weights from the end of the best epoch.
+Epoch 00283: early stopping
+2.406234602133433 min
+Processing batch 239
+Restoring model weights from the end of the best epoch.
+Epoch 00275: early stopping
+2.4131184975306192 min
+Processing batch 240
+Restoring model weights from the end of the best epoch.
+Epoch 00227: early stopping
+2.41142156124115 min
+Processing batch 241
+Restoring model weights from the end of the best epoch.
+Epoch 00243: early stopping
+2.4072733481725055 min
+Processing batch 242
+Restoring model weights from the end of the best epoch.
+Epoch 00207: early stopping
+2.4121445139249165 min
+Processing batch 243
+Restoring model weights from the end of the best epoch.
+Epoch 00189: early stopping
+2.4059257825215656 min
+Processing batch 244
+Restoring model weights from the end of the best epoch.
+Epoch 00252: early stopping
+2.413271427154541 min
+Processing batch 245
+Restoring model weights from the end of the best epoch.
+Epoch 00273: early stopping
+2.411810910701752 min
+Processing batch 246
+Restoring model weights from the end of the best epoch.
+Epoch 00197: early stopping
+2.405781594912211 min
+Processing batch 247
+Restoring model weights from the end of the best epoch.
+Epoch 00222: early stopping
+2.404744609196981 min
+Processing batch 248
+Restoring model weights from the end of the best epoch.
+Epoch 00281: early stopping
+2.405224939187368 min
+Processing batch 249
+Restoring model weights from the end of the best epoch.
+Epoch 00246: early stopping
+2.4064682920773826 min
+Processing batch 250
+Restoring model weights from the end of the best epoch.
+Epoch 00257: early stopping
+2.410977025826772 min
+Processing batch 251
+Restoring model weights from the end of the best epoch.
+Epoch 00182: early stopping
+1.4057438135147096 min
+Processing batch 252
+Restoring model weights from the end of the best epoch.
+Epoch 00242: early stopping
+2.4103551506996155 min
+Processing batch 253
+Restoring model weights from the end of the best epoch.
+Epoch 00237: early stopping
+2.405910348892212 min
+Processing batch 254
+Restoring model weights from the end of the best epoch.
+Epoch 00371: early stopping
+3.406827080249786 min
+Processing batch 255
+Restoring model weights from the end of the best epoch.
+Epoch 00185: early stopping
+1.4124719580014546 min
+Processing batch 256
+Restoring model weights from the end of the best epoch.
+Epoch 00252: early stopping
+2.406115833918254 min
+Processing batch 257
+Restoring model weights from the end of the best epoch.
+Epoch 00344: early stopping
+3.4106412529945374 min
+Processing batch 258
+Restoring model weights from the end of the best epoch.
+Epoch 00213: early stopping
+2.4057239731152853 min
+Processing batch 259
+Restoring model weights from the end of the best epoch.
+Epoch 00228: early stopping
+2.416128917535146 min
+Processing batch 260
+Restoring model weights from the end of the best epoch.
+Epoch 00252: early stopping
+2.4107338984807334 min
+Processing batch 261
+Restoring model weights from the end of the best epoch.
+Epoch 00230: early stopping
+2.4090362151463824 min
+Processing batch 262
+Restoring model weights from the end of the best epoch.
+Epoch 00217: early stopping
+2.414159079392751 min
+Processing batch 263
+Restoring model weights from the end of the best epoch.
+Epoch 00222: early stopping
+2.4019796291987103 min
+Processing batch 264
+Restoring model weights from the end of the best epoch.
+Epoch 00260: early stopping
+2.41649862130483 min
+Processing batch 265
+Restoring model weights from the end of the best epoch.
+Epoch 00236: early stopping
+2.417902628580729 min
+Processing batch 266
+Restoring model weights from the end of the best epoch.
+Epoch 00327: early stopping
+3.411012649536133 min
+Processing batch 267
+Restoring model weights from the end of the best epoch.
+Epoch 00203: early stopping
+2.4113423466682433 min
+Processing batch 268
+Restoring model weights from the end of the best epoch.
+Epoch 00254: early stopping
+2.40935259660085 min
+Processing batch 269
+Restoring model weights from the end of the best epoch.
+Epoch 00199: early stopping
+2.416481296221415 min
+Processing batch 270
+Restoring model weights from the end of the best epoch.
+Epoch 00218: early stopping
+2.415700634320577 min
+Processing batch 271
+Restoring model weights from the end of the best epoch.
+Epoch 00379: early stopping
+3.40873863697052 min
+Processing batch 272
+Restoring model weights from the end of the best epoch.
+Epoch 00281: early stopping
+2.413651124636332 min
+Processing batch 273
+Restoring model weights from the end of the best epoch.
+Epoch 00283: early stopping
+2.4086787660916644 min
+Processing batch 274
+Restoring model weights from the end of the best epoch.
+Epoch 00297: early stopping
+2.413938407103221 min
+Processing batch 275
+Restoring model weights from the end of the best epoch.
+Epoch 00219: early stopping
+2.418832306067149 min
+Processing batch 276
+Restoring model weights from the end of the best epoch.
+Epoch 00299: early stopping
+3.4058272361755373 min
+Processing batch 277
+Restoring model weights from the end of the best epoch.
+Epoch 00211: early stopping
+2.416703832149506 min
+Processing batch 278
+Restoring model weights from the end of the best epoch.
+Epoch 00201: early stopping
+2.402993329366048 min
+Processing batch 279
+Restoring model weights from the end of the best epoch.
+Epoch 00294: early stopping
+3.4151560187339784 min
+Processing batch 280
+Restoring model weights from the end of the best epoch.
+Epoch 00277: early stopping
+2.418065571784973 min
+Processing batch 281
+Restoring model weights from the end of the best epoch.
+Epoch 00251: early stopping
+2.411021649837494 min
+Processing batch 282
+Restoring model weights from the end of the best epoch.
+Epoch 00272: early stopping
+2.413508494695028 min
+Processing batch 283
+Restoring model weights from the end of the best epoch.
+Epoch 00296: early stopping
+2.4022746364275616 min
+Processing batch 284
+Restoring model weights from the end of the best epoch.
+Epoch 00238: early stopping
+2.420433962345123 min
+Processing batch 285
+Restoring model weights from the end of the best epoch.
+Epoch 00206: early stopping
+2.4209078907966615 min
+Processing batch 286
+Restoring model weights from the end of the best epoch.
+Epoch 00214: early stopping
+2.4122445742289225 min
+Processing batch 287
+Restoring model weights from the end of the best epoch.
+Epoch 00227: early stopping
+2.411347206433614 min
+Processing batch 288
+Restoring model weights from the end of the best epoch.
+Epoch 00271: early stopping
+2.409389066696167 min
+Processing batch 289
+Restoring model weights from the end of the best epoch.
+Epoch 00306: early stopping
+3.4199194510777793 min
+Processing batch 290
+Restoring model weights from the end of the best epoch.
+Epoch 00240: early stopping
+2.4204579909642536 min
+Processing batch 291
+Restoring model weights from the end of the best epoch.
+Epoch 00342: early stopping
+3.409904408454895 min
+Processing batch 292
+Restoring model weights from the end of the best epoch.
+Epoch 00275: early stopping
+2.4166131973266602 min
+Processing batch 293
+Restoring model weights from the end of the best epoch.
+Epoch 00293: early stopping
+2.4108197887738547 min
+Processing batch 294
+Restoring model weights from the end of the best epoch.
+Epoch 00277: early stopping
+2.4167224884033205 min
+Processing batch 295
+Restoring model weights from the end of the best epoch.
+Epoch 00292: early stopping
+2.4182207663853963 min
+Processing batch 296
+Restoring model weights from the end of the best epoch.
+Epoch 00211: early stopping
+2.4126240968704225 min
+Processing batch 297
+Restoring model weights from the end of the best epoch.
+Epoch 00249: early stopping
+2.4181044260660807 min
+Processing batch 298
+Restoring model weights from the end of the best epoch.
+Epoch 00209: early stopping
+2.405625840028127 min
+Processing batch 299
+Restoring model weights from the end of the best epoch.
+Epoch 00283: early stopping
+2.4125571926434835 min
+Processing batch 300
+Restoring model weights from the end of the best epoch.
+Epoch 00188: early stopping
+1.4078398942947388 min
+Processing batch 301
+Restoring model weights from the end of the best epoch.
+Epoch 00296: early stopping
+2.4061777710914614 min
+Processing batch 302
+Restoring model weights from the end of the best epoch.
+Epoch 00190: early stopping
+2.4107925573984783 min
+Processing batch 303
+Restoring model weights from the end of the best epoch.
+Epoch 00221: early stopping
+2.4061582048734027 min
+Processing batch 304
+Restoring model weights from the end of the best epoch.
+Epoch 00248: early stopping
+2.413025991121928 min
+Processing batch 305
+Restoring model weights from the end of the best epoch.
+Epoch 00265: early stopping
+2.411743207772573 min
+Processing batch 306
+Restoring model weights from the end of the best epoch.
+Epoch 00229: early stopping
+2.4063589374224343 min
+Processing batch 307
+Restoring model weights from the end of the best epoch.
+Epoch 00311: early stopping
+2.4109450618426007 min
+Processing batch 308
+Restoring model weights from the end of the best epoch.
+Epoch 00273: early stopping
+2.4060001254081724 min
+Processing batch 309
+Restoring model weights from the end of the best epoch.
+Epoch 00286: early stopping
+2.4097132245699564 min
+Processing batch 310
+Restoring model weights from the end of the best epoch.
+Epoch 00266: early stopping
+2.4119995713233946 min
+Processing batch 311
+Restoring model weights from the end of the best epoch.
+Epoch 00302: early stopping
+2.406234701474508 min
+Processing batch 312
+Restoring model weights from the end of the best epoch.
+Epoch 00277: early stopping
+2.4111881613731385 min
+Processing batch 313

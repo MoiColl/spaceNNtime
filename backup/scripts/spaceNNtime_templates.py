@@ -276,10 +276,11 @@ def callbacks(weights_file_name):
         save_freq         = "epoch")
 
     earlystop=tf.keras.callbacks.EarlyStopping(
-        monitor   = "val_loss",
-        min_delta = 0,
-        patience  = 100,
-        verbose   = 1)
+        monitor              = "val_loss",
+        min_delta            = 0,
+        patience             = 100,
+        verbose              = 1,
+        restore_best_weights = True)
     
     reducelr=tf.keras.callbacks.ReduceLROnPlateau(
         monitor  = 'val_loss',
@@ -342,7 +343,7 @@ def dense_batchnorm_activation(model, l, n):
 def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256, loss_function = "edl", w_time = 1, w_space = 1, w_sample = np.array(1)):
     model = tf.keras.Sequential()                                             # Start a fully connected neural network
     model.add(norm)                                                           # Add a normalization layer
-    dense_batchnorm_activation(model, l = int(np.floor(l/2)), n = n)        # Add half of the desired layers
+    dense_batchnorm_activation(model, l = int(np.floor(l/2)), n = n)          # Add half of the desired layers
     model.add(tf.keras.layers.Dropout(dropout_prop))                          # Add a drop out layer
     dense_batchnorm_activation(model, l = int(np.ceil(l/2)), n = n)           # Add the rest of the desired layers
     [model.add(tf.keras.layers.Dense(output_shape)) for _ in range(2)]        # Add two extra layers for the output
@@ -360,14 +361,14 @@ def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256,
 
 #B.6
 def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks):
-    history = model.fit(x               = tra_fea, 
-                        y               = tra_lab,
-                        epochs          = 5000,
-                        batch_size      =   32,
-                        shuffle         = True,
-                        verbose         = False,
-                        validation_data = (val_fea, val_lab),
-                        callbacks       = callbacks)
+    history = model.fit(x                    = tra_fea, 
+                        y                    = tra_lab,
+                        epochs               = 5000,
+                        batch_size           =   32,
+                        shuffle              = True,
+                        verbose              = False,
+                        validation_data      = (val_fea, val_lab),
+                        callbacks            = callbacks)
     
     return history
 
@@ -412,9 +413,9 @@ def write_pred(sim, exp, nam, typ, gro, ind, idx, snp, run, pre, true, pred, new
         df2["diff_space"] = np.array(tf_haversine(true[:, 0:2].astype('float32'), pred[:, 0:2].astype('float32')))
 
     if pre in ["sNNt", "time"]:
-        df2["true_tim"]  = true[:, 2]
-        df2["pred_tim"]  = pred[:, 2]
-        df2["diff_time"] = true[:, 2]-pred[:, 2]
+        df2["true_tim"]  = true[:, -1]
+        df2["pred_tim"]  = pred[:, -1]
+        df2["diff_time"] = true[:, -1]-pred[:, -1]
     df2 = pd.DataFrame(df2)
 
     df = pd.concat([df1, df2], axis=1)
