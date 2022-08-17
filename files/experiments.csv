@@ -42,3 +42,6 @@ europe;40;loss;4;1500;1;sNNt;gt;0;0;hdtd;None;None;1;100000;None;256;1g;normal;0
 europe;41;gl_mix;4;1500;1;sNNt;gl_mix;30;0.05;hdtd;Norm1;None;1;1;None;256;2g;normal;08:00:00
 europe;42;gp_mix;4;1500;1;sNNt;gp_mix;30;0.05;hdtd;Norm1;None;1;1;None;256;2g;normal;08:00:00
 europe;43;gl;4;1500;1;sNNt;gl;30;0.05;hdtd;Norm1;None;1;1;None;256;2g;normal;08:00:00
+europe;44;loss;4;1500;1;sNNt;gt;0;0;mse;None;Norm1;1;1;None;256;1g;normal;08:00:00
+europe;45;loss;4;1500;1;sNNt;gt;0;0;edl;None;Norm1;1;1;None;256;1g;normal;08:00:00
+europe;46;loss;4;1500;1;sNNt;gt;0;0;hdtd;None;None;1;1000000;None;256;1g;normal;08:00:00
