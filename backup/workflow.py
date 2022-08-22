@@ -34,7 +34,8 @@ for i in range(len(experiments)):
 							  spaceNNtime_sim(sim = experiments["sim"][i], exp = experiments["exp"][i], nam = experiments["nam"][i], 
 							                  met = experiments["met"][i],
 							                  snp = experiments["snp"][i], pre = experiments["pre"][i], typ = experiments["typ"][i], 
-											  cov = experiments["cov"][i], err = experiments["err"][i], 
+											  cov = experiments["cov"][i], std = experiments["std"][i], err = experiments["err"][i], 
 											  los = experiments["los"][i], nfe = experiments["nfe"][i], nla = experiments["nla"][i], 
-											  wti = experiments["wti"][i], wsp = experiments["wsp"][i], wsa = experiments["wsa"][i], 											  nod = experiments["nod"][i], 
+											  wti = experiments["wti"][i], wsp = experiments["wsp"][i], wsa = experiments["wsa"][i], 
+											  nod = experiments["nod"][i], 
 											  mem = experiments["mem"][i], que = experiments["que"][i], tim = experiments["tim"][i]))

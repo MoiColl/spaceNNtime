@@ -322,14 +322,14 @@ def tf_haversine(latlon1, latlon2):
     return REarth * d
 
 #B.11
-def haversine_distance_time_difference(w_space = 1, w_time = 1, w_sample = np.array(1)):
+def haversine_distance_time_difference(w_space = 1, w_time = 1):
     '''
     https://medium.com/@Bloomore/how-to-write-a-custom-loss-function-with-additional-arguments-in-keras-5f193929f7a0
     '''
     def loss(y_true, y_pred):
         err_space = tf_haversine(y_true[:, 0:2], y_pred[:, 0:2])*w_space
         err_time  = mean_squared_error(tf.reshape(y_true[:, 2], (-1, 1)), tf.reshape(y_pred[:, 2], (-1, 1)))*w_time
-        return K.mean(tf.transpose(tf.reshape(K.concatenate((err_space, err_time)), (2, -1)))*w_sample.reshape(-1, 1), axis=-1)
+        return K.mean(tf.transpose(tf.reshape(K.concatenate((err_space, err_time)), (2, -1))), axis=-1)
     return loss
 
 #B.12
@@ -340,7 +340,7 @@ def dense_batchnorm_activation(model, l, n):
         model.add(tf.keras.layers.Activation('elu'))
 
 #B.13
-def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256, loss_function = "edl", w_time = 1, w_space = 1, w_sample = np.array(1)):
+def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256, loss_function = "edl", w_time = 1, w_space = 1):
     model = tf.keras.Sequential()                                             # Start a fully connected neural network
     model.add(norm)                                                           # Add a normalization layer
     dense_batchnorm_activation(model, l = int(np.floor(l/2)), n = n)          # Add half of the desired layers
@@ -351,7 +351,7 @@ def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256,
     if loss_function == "edl":                                                # Compile the model deciding on the loss function and the optimizer
         model.compile(optimizer="Adam", loss=euclidean_distance_loss)
     elif loss_function == "hdtd":
-        model.compile(optimizer="Adam", loss=haversine_distance_time_difference(w_time = w_time, w_space = w_space, w_sample = w_sample))
+        model.compile(optimizer="Adam", loss=haversine_distance_time_difference(w_time = w_time, w_space = w_space))
     elif loss_function == "hd":
         model.compile(optimizer="Adam", loss=tf_haversine)
     elif loss_function == "mse":
@@ -360,7 +360,7 @@ def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256,
 
 
 #B.6
-def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks):
+def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks, sample_weight):
     history = model.fit(x                    = tra_fea, 
                         y                    = tra_lab,
                         epochs               = 5000,
@@ -368,7 +368,8 @@ def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks):
                         shuffle              = True,
                         verbose              = False,
                         validation_data      = (val_fea, val_lab),
-                        callbacks            = callbacks)
+                        callbacks            = callbacks,
+                        sample_weight        = sample_weight)
     
     return history
 
@@ -378,7 +379,7 @@ def plot_loss(history, fig_path = None):
     hist['epoch'] = history.epoch
     if fig_path:
         fig  = plt.figure()
-    plt.axvline(x = int(hist[np.min(hist["val_loss"]) == hist["val_loss"]]["epoch"]), c = "red", alpha = 0.5, linestyle = "dashed", label='Early Stop')
+    plt.axvline(x = int(hist[np.min(hist["val_loss"]) == hist["val_loss"]].head(1)["epoch"]), c = "red", alpha = 0.5, linestyle = "dashed", label='Early Stop')
     plt.plot(history.history['loss'], label='Train')
     plt.plot(history.history['val_loss'], label='Validation')
     plt.xlabel('Epoch')

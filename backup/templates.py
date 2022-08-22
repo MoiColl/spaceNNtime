@@ -3,7 +3,7 @@ from gwf import Workflow
 
 #B. Templates
 ##B.1.
-def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, err, los, nfe, nla, wti, wsp, wsa, nod, mem, que, tim):
+def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, std, err, los, nfe, nla, wti, wsp, wsa, nod, mem, que, tim):
 	'''
 	Runs spaceNNtime for simulated data
 	'''
@@ -26,10 +26,16 @@ def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, err, los, nfe, nla, 
 	mkdir -p /home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models
 	mkdir -p /home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots
 
-	python /home/moicoll/spaceNNtime/scripts/spaceNNtime_sim.py {sim} {exp} {nam} {met} {snp} {pre} {typ} {cov} {err} {los} {nfe} {nla} {wti} {wsp} {wsa} {nod}
+	python /home/moicoll/spaceNNtime/scripts/spaceNNtime_sim.py {sim} {exp} {nam} {met} {snp} {pre} {typ} {cov} {std} {err} {los} {nfe} {nla} {wti} {wsp} {wsa} {nod}
 
 	touch /home/moicoll/spaceNNtime/sandbox/completed/{sim}_{exp}.DONE
-	'''.format(sim = sim, exp = exp, nam = nam, met = met, snp = snp, pre = pre, typ = typ, cov = cov, 
+	echo ""
+	echo ""
+	echo ""
+	echo "JOBINFO"
+	echo "======="
+	jobinfo $PBS_JOBID
+	'''.format(sim = sim, exp = exp, nam = nam, met = met, snp = snp, pre = pre, typ = typ, cov = cov, std = std,
 	           err = err, los = los, nfe = nfe, nla = nla, wti = wti, wsp = wsp, wsa = wsa, nod = nod)
 
 

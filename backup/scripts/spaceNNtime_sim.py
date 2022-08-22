@@ -9,27 +9,35 @@ from tensorflow.python.client import device_lib
 print("Which devices are available?")
 print(device_lib.list_local_devices())
 
-sim, exp, nam, met, snp, pre, typ, cov, err, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
+sim, exp, nam, met, snp, pre, typ, cov, std, err, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
 snp = float(snp)
 cov = float(cov)
+std = float(std)
 err = float(err)
 nod = int(nod)
 wti = float(wti)
 wsp = float(wsp)
 
+
 ts            = tskit.load("/home/moicoll/spaceNNtime/data/{sim}/tree.trees".format(sim = sim))
 metadata      = pd.read_csv("/home/moicoll/spaceNNtime/data/{sim}/metadata/{met}.txt".format(sim = sim, met = met), delimiter = "\t")
+
+if wsa == "None":
+    wsa = np.ones(metadata.shape[0])
+elif wsa == "coverage":
+    rng = np.random.default_rng(1234)
+    cov = simGL.depth_per_haplotype(rng = rng, mean_depth = cov, std_depth = std, n_hap = metadata.shape[0]*2)
+    wsa = cov.reshape(-1, 2).sum(axis = 1)
+    pd.DataFrame({"ind" : metadata["ind_id"],
+                  "co1" : cov.reshape(-1, 2)[:, 0],
+                  "co2" : cov.reshape(-1, 2)[:, 1]}).to_csv("/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models/coverage.txt".format(sim = sim, exp = exp), mode='w', header=True, sep = "\t", index = False)
+
 input         = get_input(ts, metadata, snp, typ, cov, err)
 output        = get_output(pre, metadata)
 print("input shape:", input.shape)
 print(input)
 print("output shape:", output.shape)
 print(output)
-
-if wsa == "None":
-    wsa = np.array(1)
-if wsa == "coverage":
-    pass
 
 print("Getting travaltes")
 tra_val_tes   = get_tra_val_tes(metadata["ind_id"].to_numpy(), file = "/home/moicoll/spaceNNtime/sandbox/{sim}/{met}/tra_val_tes_{met}.json".format(sim = sim, met = met))
@@ -57,20 +65,20 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
                         n             = nod, 
                         loss_function = los, 
                         w_time        = wti, 
-                        w_space       = wsp, 
-                        w_sample      = wsa)
+                        w_space       = wsp)
 
     if j == 0:
         model.summary()
 
     checkpoint, earlystop, reducelr = callbacks(weights_file_name = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models/group{i}_weights.hdf5".format(sim = sim, exp = exp, i = i))
 
-    history = train_spaceNNtime(model     = model, 
-                                tra_fea   = input[:, tra_val_tes[i]["tra"]].T, 
-                                tra_lab   = norm_labels(output[tra_val_tes[i]["tra"], :]), 
-                                val_fea   = input[:, tra_val_tes[i]["val"]].T, 
-                                val_lab   = norm_labels(output[tra_val_tes[i]["val"], :]),
-                                callbacks = [checkpoint, earlystop, reducelr])
+    history = train_spaceNNtime(model         = model, 
+                                tra_fea       = input[:, tra_val_tes[i]["tra"]].T, 
+                                tra_lab       = norm_labels(output[tra_val_tes[i]["tra"], :]), 
+                                val_fea       = input[:, tra_val_tes[i]["val"]].T, 
+                                val_lab       = norm_labels(output[tra_val_tes[i]["val"], :]),
+                                callbacks     = [checkpoint, earlystop, reducelr],
+                                sample_weight = wsa[tra_val_tes[i]["tra"]])
 
     plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots/group{i}_history.png".format(sim = sim, exp = exp, i = i))
 
