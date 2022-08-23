@@ -1,9 +1,0 @@
-sNNt_europe_7_loss
-sNNt_europe_16_downsample
-sNNt_europe_17_downsample
-sNNt_europe_21_snp_density
-sNNt_europe_23_prediction
-sNNt_europe_32_gl
-sNNt_europe_37_gl_mix
-sNNt_europe_42_gp
-sNNt_europe_47_gp_mix
