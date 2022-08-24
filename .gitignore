@@ -1,4 +1,5 @@
 data/*/*.*
+data/europe/metadata/*
 files/neo.*
 results/
 sandbox/completed/
@@ -6,6 +7,8 @@ sandbox/*/*/history_plots/
 sandbox/*/*/models/
 sandbox/*/*/tra_val_tes_*.json
 sandbox/*/*/carryon.txt
+sandbox/europe_old2
+sandbox/europe_old
 .gwf/
 .gwfconf.json
 .gwf/slurm-backend-tracked.json
