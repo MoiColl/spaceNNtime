@@ -10,9 +10,9 @@ europe;8;loss;5;1500;1;sNNt;gt;0;0;0;mse;None;None;1;1;None;64;1g;normal;08:00:0
 europe;9;loss;5;1500;1;sNNt;gt;0;0;0;mse;None;Norm1;1;10000;None;64;1g;normal;08:00:00;08:28:27
 europe;10;loss;5;1500;1;sNNt;gt;0;0;0;edl;None;None;1;1;None;64;1g;normal;08:00:00;12:47:35
 europe;11;loss;5;1500;1;sNNt;gt;0;0;0;edl;None;Norm1;1;10000;None;64;1g;normal;08:00:00;09:00:21
-europe;12;downsample;12;15000;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;0
-europe;13;downsample;13;10000;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;4g;normal;08:00:00;0
-europe;14;downsample;14;5000;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;2g;normal;08:00:00;0
+europe;12;downsample;12;15000;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;15g;normal;1-00:00:00;0
+europe;13;downsample;13;10000;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;20g;normal;1-00:00:00;0
+europe;14;downsample;14;5000;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;20g;normal;1-00:00:00;0
 europe;15;downsample;15;1000;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;08:08:19
 europe;16;downsample;16;500;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;03:56:27
 europe;17;downsample;17;250;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;01:39:33
@@ -25,7 +25,7 @@ europe;23;prediction;5;1500;1;space;gt;0;0;0;hd;None;None;1;1;None;64;1g;normal;
 europe;24;prediction;5;1500;1;time;gt;0;0;0;mse;None;None;1;1;None;64;1g;normal;08:00:00;13:41:13
 europe;25;n_nodes;5;1500;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;128;1g;normal;08:00:00;16:48:23
 europe;26;n_nodes;5;1500;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;256;1g;normal;08:00:00;1-01:29:33
-europe;27;n_nodes;5;1500;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;512;1g;normal;08:00:00;0
+europe;27;n_nodes;5;1500;1;sNNt;gt;0;0;0;hdtd;None;None;1;10000;None;512;1g;normal;1-00:00:00;0
 europe;28;gl;5;1500;1;sNNt;gl;1;1;0.05;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;14:02:08
 europe;29;gl;5;1500;1;sNNt;gl;5;1;0.05;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;16:52:32
 europe;30;gl;5;1500;1;sNNt;gl;15;1;0.05;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;17:26:45
