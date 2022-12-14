@@ -26,7 +26,7 @@ if wsa == "None":
     wsa = np.ones(metadata.shape[0])
 elif wsa == "coverage":
     rng = np.random.default_rng(1234)
-    cov = simGL.depth_per_haplotype(rng = rng, mean_depth = cov, std_depth = std, n_hap = metadata.shape[0]*2)
+    cov = simGL.depth_per_haplotype(rng = rng, mean_depth = cov, std_depth = std, n_hap = metadata.shape[0]*2, ploidy = 2)
     wsa = cov.reshape(-1, 2).sum(axis = 1)
     pd.DataFrame({"ind" : metadata["ind_id"],
                   "co1" : cov.reshape(-1, 2)[:, 0],
