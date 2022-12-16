@@ -5,6 +5,7 @@ results/
 sandbox/completed/
 sandbox/*/*/history_plots/
 sandbox/*/*/models/
+!sandbox/*/*/models/coverage.txt
 sandbox/*/*/tra_val_tes_*.json
 sandbox/*/*/carryon.txt
 sandbox/europe_old2

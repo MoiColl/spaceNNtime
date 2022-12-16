@@ -22,15 +22,16 @@ wsp = float(wsp)
 ts            = tskit.load("/home/moicoll/spaceNNtime/data/{sim}/tree.trees".format(sim = sim))
 metadata      = pd.read_csv("/home/moicoll/spaceNNtime/data/{sim}/metadata/{met}.txt".format(sim = sim, met = met), delimiter = "\t")
 
+if nam not in ["loss", "reference", "downsample", "sampling", "snp_density", "prediction", "n_nodes"]:
+    cov = simGL.depth_per_haplotype(rng = np.random.default_rng(1234), mean_depth = cov, std_depth = std, n_hap = metadata.shape[0]*2, ploidy = 2)
+    pd.DataFrame({"ind" : metadata["ind_id"],
+                  "co1" : cov.reshape(-1, 2)[:, 0],
+                  "co2" : cov.reshape(-1, 2)[:, 1]}).to_csv("/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/coverage.txt".format(sim = sim, exp = exp), mode='w', header=True, sep = "\t", index = False)
+
 if wsa == "None":
     wsa = np.ones(metadata.shape[0])
 elif wsa == "coverage":
-    rng = np.random.default_rng(1234)
-    cov = simGL.depth_per_haplotype(rng = rng, mean_depth = cov, std_depth = std, n_hap = metadata.shape[0]*2, ploidy = 2)
     wsa = cov.reshape(-1, 2).sum(axis = 1)
-    pd.DataFrame({"ind" : metadata["ind_id"],
-                  "co1" : cov.reshape(-1, 2)[:, 0],
-                  "co2" : cov.reshape(-1, 2)[:, 1]}).to_csv("/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models/coverage.txt".format(sim = sim, exp = exp), mode='w', header=True, sep = "\t", index = False)
 
 input         = get_input(ts, metadata, snp, typ, cov, err)
 output        = get_output(pre, metadata)
