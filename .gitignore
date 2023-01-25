@@ -1,6 +1,10 @@
 data/*/*.*
 data/europe/metadata/*
 files/neo.*
+files/igsr_1KGPhase3_populations.tsv
+files/igsr_1KGPhase3_samples.tsv
+files/v54.1_1240K_public.anno
+files/v54.1_1240K_public_reformated.anno
 results/
 sandbox/completed/
 sandbox/*/*/history_plots/
