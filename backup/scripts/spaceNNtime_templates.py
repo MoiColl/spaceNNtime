@@ -222,6 +222,25 @@ def get_input(ts, metadata, snp, typ, cov, err):
 
         return minGLidx
 
+def get_input_AADR(metadata, chrom, start, end):
+    snp     = pd.read_table("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public_nospaces.snp", index_col = None, header = None, names = ["snp", "chr", "gen", "pos", "ref", "alt"])
+
+    snp_idx = np.array([i for i in snp[(snp.chr == chrom) & (snp.pos >= start) & (snp.pos < end)].index])
+    geno = []
+    with open("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public.eigenstratgeno", "r") as f:
+        for i, l in enumerate(f):
+            if i >= snp_idx[0] and i <= snp_idx[-1]:
+                geno.append([int(x) for x in l.strip()])
+            elif i > snp_idx[-1]:
+                break
+            
+    geno = np.array(geno)[:, metadata.index.to_numpy()]
+
+    geno[geno == 9] = -1
+
+    return geno, snp[(snp.chr == chrom) & (snp.pos >= start) & (snp.pos < end)].pos.to_numpy()
+
+
 def get_output(pre, metadata):
     '''
     Def :
@@ -426,3 +445,26 @@ def write_pred(sim, exp, nam, typ, gro, ind, idx, snp, run, pre, true, pred, new
     else:
         df.to_csv(file_name, mode='a', header=False, sep = "\t", index = False)
     return False
+
+#B.10
+def write_qc_ind(ind, geno, file_name):
+    pd.DataFrame({
+        "ind" : ind,
+        "noncal" : np.sum(geno == -1, axis = 0),
+        "homref" : np.sum(geno ==  0, axis = 0),
+        "hethet" : np.sum(geno ==  1, axis = 0),
+        "homalt" : np.sum(geno ==  2, axis = 0),
+        "noncha" : np.sum((geno > 2) * (geno < -1), axis = 0)
+    }).to_csv(file_name, mode='w', header=False, sep = "\t", index = False)
+
+#B.11
+def write_qc_snp(snp, geno, file_name):
+    print(snp.shape, np.sum(geno == -1, axis = 1).shape)
+    pd.DataFrame({
+        "snp"    : snp,
+        "noncal" : np.sum(geno == -1, axis = 1),
+        "homref" : np.sum(geno ==  0, axis = 1),
+        "hethet" : np.sum(geno ==  1, axis = 1),
+        "homalt" : np.sum(geno ==  2, axis = 1),
+        "noncha" : np.sum((geno > 2) * (geno < -1), axis = 1)
+    }).to_csv(file_name, mode='w', header=False, sep = "\t", index = False)

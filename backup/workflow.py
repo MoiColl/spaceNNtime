@@ -9,8 +9,10 @@ gwf = Workflow()
 
 workingdir  = "/home/moicoll/spaceNNtime/"
 experiments = pd.read_csv("{}files/experiments.csv".format(workingdir), delimiter = ";")
+experiments_AADR = pd.read_csv("{}files/experiments_AADR.csv".format(workingdir), delimiter = ";")
 
 #C. CODE
+#C.1 simulations
 for i in range(len(experiments)):
 	dir_meta = "{}data/{}/metadata".format(workingdir, experiments["sim"][i], experiments["met"][i])
 	metadata = "{}/{}.txt".format(dir_meta, experiments["met"][i])
@@ -39,3 +41,17 @@ for i in range(len(experiments)):
 											  wti = experiments["wti"][i], wsp = experiments["wsp"][i], wsa = experiments["wsa"][i], 
 											  nod = experiments["nod"][i], 
 											  mem = experiments["mem"][i], que = experiments["que"][i], tim = experiments["tim"][i]))
+
+#C.2 AADR data
+for i in range(len(experiments_AADR)):	
+	# Run spaceNNtime
+	gwf.target_from_template("sNNt_AADR_{}_{}_{}_{}_{}".format(experiments_AADR["exp"][i], experiments_AADR["nam"][i], experiments_AADR["cro"][i], experiments_AADR["sta"][i], experiments_AADR["end"][i]), 
+							   spaceNNtime_AADR(exp = experiments_AADR["exp"][i], nam = experiments_AADR["nam"][i], 
+							                    met = experiments_AADR["met"][i], 
+								  			    cro = experiments_AADR["cro"][i], sta = experiments_AADR["sta"][i], end = experiments_AADR["end"][i],
+								 			    dmt = experiments_AADR["dmt"][i],
+							                    pre = experiments_AADR["pre"][i], typ = experiments_AADR["typ"][i], 
+								 			    los = experiments_AADR["los"][i], nfe = experiments_AADR["nfe"][i], nla = experiments_AADR["nla"][i], 
+								 			    wti = experiments_AADR["wti"][i], wsp = experiments_AADR["wsp"][i], wsa = experiments_AADR["wsa"][i], 
+								 			    nod = experiments_AADR["nod"][i], 
+								 			    mem = experiments_AADR["mem"][i], que = experiments_AADR["que"][i], tim = experiments_AADR["tim"][i]))

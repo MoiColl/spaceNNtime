@@ -1,0 +1,14 @@
+exp;nam;met;cro;sta;end;dmt;pre;typ;los;nfe;nla;wti;wsp;wsa;nod;mem;que;tim;tto
+1;loss;1;1;10000000;20000000;Direct,Known;sNNt;gt;hdtd;None;None;1;1000;None;64;8g;normal;08:00:00;12:59:36
+2;general;1;1;10000000;20000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+3;loss;1;1;10000000;20000000;Direct,Known;sNNt;gt;hdtd;None;None;1;100000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;0;10000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;20000000;30000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;30000000;40000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;40000000;50000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;50000000;60000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;60000000;70000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;70000000;80000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;80000000;90000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+2;window;1;1;90000000;100000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;8g;normal;08:00:00;13:25:02
+4;allwindow;1;1;0;100000000;Direct,Known;sNNt;gt;hdtd;None;None;1;10000;None;64;100g;normal;1-00:00:00;13:25:02
