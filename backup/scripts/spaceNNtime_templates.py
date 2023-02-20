@@ -446,7 +446,47 @@ def write_pred(sim, exp, nam, typ, gro, ind, idx, snp, run, pre, true, pred, new
         df.to_csv(file_name, mode='a', header=False, sep = "\t", index = False)
     return False
 
-#B.10
+#B.9
+def write_pred_AADR(sim, exp, nam, typ, cro, sta, end, gro, ind, idx, snp, run, pre, true, pred, new_file, file_name):
+
+    df1 = pd.DataFrame({
+       "sim" : sim,
+       "exp" : exp,
+       "nam" : nam,
+       "typ" : typ,
+       "cro" : cro,
+       "sta" : sta,
+       "end" : end,
+       "gro" : gro,
+       "ind" : ind,
+       "idx" : idx,
+       "snp" : snp,
+       "run" : run,
+       })
+
+    df2 = {}
+    if pre in ["sNNt", "space"]:
+        df2["true_lat"]   = true[:, 0]
+        df2["true_lon"]   = true[:, 1]
+        df2["pred_lat"]   = pred[:, 0]
+        df2["pred_lon"]   = pred[:, 1]
+        df2["diff_space"] = np.array(tf_haversine(true[:, 0:2].astype('float32'), pred[:, 0:2].astype('float32')))
+
+    if pre in ["sNNt", "time"]:
+        df2["true_tim"]  = true[:, -1]
+        df2["pred_tim"]  = pred[:, -1]
+        df2["diff_time"] = true[:, -1]-pred[:, -1]
+    df2 = pd.DataFrame(df2)
+
+    df = pd.concat([df1, df2], axis=1)
+
+    if new_file:
+        df.to_csv(file_name, mode='w', header=True, sep = "\t", index = False)
+    else:
+        df.to_csv(file_name, mode='a', header=False, sep = "\t", index = False)
+    return False
+
+#B.11
 def write_qc_ind(ind, geno, file_name):
     pd.DataFrame({
         "ind" : ind,

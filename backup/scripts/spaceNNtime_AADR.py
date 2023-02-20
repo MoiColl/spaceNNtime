@@ -11,27 +11,32 @@ print(device_lib.list_local_devices())
 
 exp, nam, met, cro, sta, end, dmt, pre, typ, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
 cro = int(cro)
-sta = int(sta)
-end   = int(end)
+sta = int(int(sta)*1e6)
+end   = int(int(end)*1e6)
 nod   = int(nod)
 wti   = float(wti)
 wsp   = float(wsp)
 
-
-
 ind      = pd.read_table("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public_nospaces.ind", index_col = None, header = None, names = ["indivi", "sexsex", "poppop"]).filter(["indivi"])
-filt     = pd.read_table("/home/moicoll/spaceNNtime/files/AADR_filtered_metadata.txt", index_col = None)
+filt     = pd.read_table("/home/moicoll/spaceNNtime/files/AADR_filtered_metadata.txt", index_col = None, na_values="..")
+print("creating new metadata")
+print(dmt)
+print(dmt.replace("_", " ").replace('\\', ''))
 metadata = (ind.join(filt.set_index('indivi'), on = "indivi",  how = "inner")
                .reset_index()
                .rename(columns={"latitu" : "lat", "longit" : "lon", "datmea" : "time"})
-               .query('datme2 in [{}]'.format(",".join(['"{}"'.format(x) for x in dmt.split(",")]))))
+               .query(dmt.replace("_", " ").replace('\\', '')))
+
+print(metadata)
 
 if wsa == "None":
     wsa = np.ones(metadata.shape[0])
 elif wsa == "coverage":
     sys.exit("No correct wsa variable")
 
+print("Reading input...")
 input, snp    = get_input_AADR(metadata, cro, sta, end)
+print("Reading output...")
 output        = get_output(pre, metadata)
 
 print("input shape:", input.shape)
@@ -87,20 +92,23 @@ for j, i in enumerate(range(sta_batch, len(tra_val_tes))):
 
     pred = model.predict(input[:, tra_val_tes[i]["tes"]].T)
     
-    new_file  = write_pred(sim       = "AADR", 
-                           exp       = exp, 
-                           nam       = nam, 
-                           typ       = typ, 
-                           gro       = i, 
-                           ind       = metadata["indivi"].to_numpy()[tra_val_tes[i]["tes"]],
-                           idx       = tra_val_tes[i]["tes"], 
-                           snp       = input.shape[0], 
-                           run       = (time.time()-prev_time)/60.0, 
-                           pre       = pre, 
-                           true      = output[tra_val_tes[i]["tes"]],
-                           pred      = pred, 
-                           new_file  = new_file, 
-                           file_name = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/pred_{cro}_{sta}_{end}.txt".format(exp = exp, cro = cro, sta = sta, end = end))
+    new_file  = write_pred_AADR(sim       = "AADR", 
+                                exp       = exp, 
+                                nam       = nam, 
+                                typ       = typ,
+                                cro       = cro,
+                                sta       = sta, 
+                                end       = end,
+                                gro       = i, 
+                                ind       = metadata["indivi"].to_numpy()[tra_val_tes[i]["tes"]],
+                                idx       = tra_val_tes[i]["tes"], 
+                                snp       = input.shape[0], 
+                                run       = (time.time()-prev_time)/60.0, 
+                                pre       = pre, 
+                                true      = output[tra_val_tes[i]["tes"]],
+                                pred      = pred, 
+                                new_file  = new_file, 
+                                file_name = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/pred_{cro}_{sta}_{end}.txt".format(exp = exp, cro = cro, sta = sta, end = end))
 
     print((time.time()-prev_time)/60.0, "min")
     prev_time = time.time()

@@ -3,6 +3,44 @@ from gwf import Workflow
 
 #B. Templates
 ##B.1.
+def all_done_windows(inp, exp, cro, sta, end, win):
+	'''
+	A dummy job to just flag that the same job for different inputs have been done
+	'''
+	inputs  = inp
+	outputs = ["/home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_{sta}_{end}_{win}.DONE".format(exp = exp, cro = cro, sta = sta, end = end, win = win)]
+	options = {'memory' : '1g', 'walltime': '01:00:00', 'account' : 'GenerationInterval'}
+	spec    = '''
+	source /home/moicoll/.bash_profile
+	conda activate sNNt_au
+	
+	echo "JOBID            : " $PBS_JOBID
+	echo "HOSTNAME         : " $HOSTNAME
+	echo "CONDA_DEFAULT_ENV: " $CONDA_DEFAULT_ENV
+	
+	working_dir=/home/moicoll/spaceNNtime/sandbox/AADR/{exp}
+
+	head -n 1 ${{working_dir}}/pred_${{cro}}_${{sta}}_$(({sta}+{win})).txt > ${{working_dir}}/pred_${{cro}}_${{sta}}_${{end}}_${{win}}.txt
+
+	for s in `seq ${{sta}} ${{win}} $(({end}-{win}))`;
+	do
+		awk '{{if(NR > 1){{print}}}}' ${{working_dir}}/pred_${{cro}}_${{s}}_$(({{s}}+{win})).txt >> ${{working_dir}}/pred_${{cro}}_${{sta}}_${{end}}_${{win}}.txt
+		sleep 1
+		rm ${{working_dir}}/pred_${{cro}}_${{s}}_$(({{s}}+{win})).txt
+	done
+
+	touch /home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_{sta}_{end}_{win}.DONE
+
+	echo ""
+	echo ""
+	echo ""
+	echo "JOBINFO"
+	echo "======="
+	jobinfo $PBS_JOBID
+	'''.format(exp = exp, cro = cro, sta = sta, end = end, win = win)
+	return inputs, outputs, options, spec
+
+##B.2.
 def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, std, err, los, nfe, nla, wti, wsp, wsa, nod, mem, que, tim):
 	'''
 	Runs spaceNNtime for simulated data
@@ -41,7 +79,7 @@ def spaceNNtime_sim(sim, exp, nam, met, snp, pre, typ, cov, std, err, los, nfe, 
 
 	return inputs, outputs, options, spec
 
-
+##B.3.
 def spaceNNtime_AADR(exp, nam, met, cro, sta, end, dmt, pre, typ, los, nfe, nla, wti, wsp, wsa, nod, mem, que, tim):
 	'''
 	Runs spaceNNtime for simulated data
