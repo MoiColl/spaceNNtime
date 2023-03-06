@@ -7,8 +7,11 @@ def all_done_windows(inp, exp, cro, sta, end, win):
 	'''
 	A dummy job to just flag that the same job for different inputs have been done
 	'''
+	sta = int(sta*1e6)
+	end = int(end*1e6)
+	win = int(win*1e6)
 	inputs  = inp
-	outputs = ["/home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_{sta}_{end}_{win}.DONE".format(exp = exp, cro = cro, sta = sta, end = end, win = win)]
+	outputs = ["/home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_{sta}_{end}_{win}.DONE".format(exp = exp, cro = cro, sta = int(sta/1e6), end = int(end/1e6), win = int(win/1e6))]
 	options = {'memory' : '1g', 'walltime': '01:00:00', 'account' : 'GenerationInterval'}
 	spec    = '''
 	source /home/moicoll/.bash_profile
@@ -18,18 +21,18 @@ def all_done_windows(inp, exp, cro, sta, end, win):
 	echo "HOSTNAME         : " $HOSTNAME
 	echo "CONDA_DEFAULT_ENV: " $CONDA_DEFAULT_ENV
 	
-	working_dir=/home/moicoll/spaceNNtime/sandbox/AADR/{exp}
+	working_dir="/home/moicoll/spaceNNtime/sandbox/AADR/{exp}"
 
-	head -n 1 ${{working_dir}}/pred_${{cro}}_${{sta}}_$(({sta}+{win})).txt > ${{working_dir}}/pred_${{cro}}_${{sta}}_${{end}}_${{win}}.txt
+	head -n 1 ${{working_dir}}/pred_{cro}_{sta}_$(({sta}+{win})).txt > ${{working_dir}}/pred_{cro}_{sta}_{end}_{win}.txt
 
-	for s in `seq ${{sta}} ${{win}} $(({end}-{win}))`;
+	for s in `seq {sta} {win} $(({end}-{win}))`;
 	do
-		awk '{{if(NR > 1){{print}}}}' ${{working_dir}}/pred_${{cro}}_${{s}}_$(({{s}}+{win})).txt >> ${{working_dir}}/pred_${{cro}}_${{sta}}_${{end}}_${{win}}.txt
+		awk '{{if(NR > 1){{print}}}}' ${{working_dir}}/pred_{cro}_${{s}}_$((s+{win})).txt >> ${{working_dir}}/pred_{cro}_{sta}_{end}_{win}.txt
 		sleep 1
-		rm ${{working_dir}}/pred_${{cro}}_${{s}}_$(({{s}}+{win})).txt
+		rm ${{working_dir}}/pred_{cro}_${{s}}_$((s+{win})).txt
 	done
 
-	touch /home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_{sta}_{end}_{win}.DONE
+	touch /home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_$(({sta}/1000000))_$(({end}/1000000))_$(({win}/1000000)).DONE
 
 	echo ""
 	echo ""

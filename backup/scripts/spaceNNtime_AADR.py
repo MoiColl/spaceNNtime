@@ -12,10 +12,10 @@ print(device_lib.list_local_devices())
 exp, nam, met, cro, sta, end, dmt, pre, typ, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
 cro = int(cro)
 sta = int(int(sta)*1e6)
-end   = int(int(end)*1e6)
-nod   = int(nod)
-wti   = float(wti)
-wsp   = float(wsp)
+end = int(int(end)*1e6)
+nod = int(nod)
+wti = float(wti)
+wsp = float(wsp)
 
 ind      = pd.read_table("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public_nospaces.ind", index_col = None, header = None, names = ["indivi", "sexsex", "poppop"]).filter(["indivi"])
 filt     = pd.read_table("/home/moicoll/spaceNNtime/files/AADR_filtered_metadata.txt", index_col = None, na_values="..")
@@ -29,10 +29,6 @@ metadata = (ind.join(filt.set_index('indivi'), on = "indivi",  how = "inner")
 
 print(metadata)
 
-if wsa == "None":
-    wsa = np.ones(metadata.shape[0])
-elif wsa == "coverage":
-    sys.exit("No correct wsa variable")
 
 print("Reading input...")
 input, snp    = get_input_AADR(metadata, cro, sta, end)
@@ -46,6 +42,15 @@ print(output)
 
 write_qc_ind(metadata.indivi.to_numpy(), input, "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/qc_ind_{cro}_{sta}_{end}.txt".format(exp = exp, cro = cro, sta = sta, end = end))
 write_qc_snp(snp, input, "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/qc_snp_{cro}_{sta}_{end}.txt".format(exp = exp, cro = cro, sta = sta, end = end))
+
+if wsa == "None":
+    wsa = np.ones(metadata.shape[0])
+elif wsa == "coverage":
+    qc_ind = pd.read_table("/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/qc_ind_{cro}_{sta}_{end}.txt".format(exp = exp, cro = cro, sta = sta, end = end), names = ["indivi", "noncal", "homref", "hethet", "homalt", "noncha"])
+    qc_ind["callab"] = (qc_ind["homref"]+qc_ind["hethet"]+qc_ind["homalt"])/(qc_ind["homref"]+qc_ind["hethet"]+qc_ind["homalt"]+qc_ind["noncal"])
+    wsa    = metadata.join(qc_ind.filter(["indivi", "callab"]).set_index('indivi'), on = "indivi")["callab"].to_numpy()
+else:
+    sys.exit("No correct wsa variable")
 
 print("Getting travaltes")
 tra_val_tes   = get_tra_val_tes(metadata["indivi"].to_numpy(), file = "/home/moicoll/spaceNNtime/sandbox/AADR/{met}/tra_val_tes_{met}.json".format(met = met))
