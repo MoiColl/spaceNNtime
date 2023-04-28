@@ -9,8 +9,10 @@ from tensorflow.python.client import device_lib
 print("Which devices are available?")
 print(device_lib.list_local_devices())
 
-sim, exp, nam, met, snp, pre, typ, cov, std, err, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
+sim, exp, nam, met, snp, pre, lay, dro, typ, cov, std, err, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
 snp = float(snp)
+lay = int(lay)
+dro = float(dro)
 cov = float(cov)
 std = float(std)
 err = float(err)
@@ -61,8 +63,8 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
 
     model = spaceNNtime(output_shape  = output.shape[1], 
                         norm          = norm_features, 
-                        dropout_prop  = 0.25, 
-                        l             = 10, 
+                        dropout_prop  = dro, 
+                        l             = lay, 
                         n             = nod, 
                         loss_function = los, 
                         w_time        = wti, 
