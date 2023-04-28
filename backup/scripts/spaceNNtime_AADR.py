@@ -9,10 +9,12 @@ from tensorflow.python.client import device_lib
 print("Which devices are available?")
 print(device_lib.list_local_devices())
 
-exp, nam, met, cro, sta, end, dmt, pre, typ, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
+exp, nam, met, cro, sta, end, dmt, pre, lay, dro, typ, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
 cro = int(cro)
 sta = int(int(sta)*1e6)
 end = int(int(end)*1e6)
+lay = int(lay)
+dro = float(dro)
 nod = int(nod)
 wti = float(wti)
 wsp = float(wsp)
@@ -49,6 +51,12 @@ elif wsa == "coverage":
     qc_ind = pd.read_table("/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/qc_ind_{cro}_{sta}_{end}.txt".format(exp = exp, cro = cro, sta = sta, end = end), names = ["indivi", "noncal", "homref", "hethet", "homalt", "noncha"])
     qc_ind["callab"] = (qc_ind["homref"]+qc_ind["hethet"]+qc_ind["homalt"])/(qc_ind["homref"]+qc_ind["hethet"]+qc_ind["homalt"]+qc_ind["noncal"])
     wsa    = metadata.join(qc_ind.filter(["indivi", "callab"]).set_index('indivi'), on = "indivi")["callab"].to_numpy()
+elif "timing" in wsa:
+    timing_val = int(wsa[len("timing"):])
+    wsa = np.ones(metadata.shape[0])
+    wsa[metadata["datmet"] != "Context"] = timing_val 
+elif wsa == "datstd":
+    wsa = 1-(metadata["datstd"]/metadata["datmet"])
 else:
     sys.exit("No correct wsa variable")
 
@@ -73,8 +81,8 @@ for j, i in enumerate(range(sta_batch, len(tra_val_tes))):
 
     model = spaceNNtime(output_shape  = output.shape[1], 
                         norm          = norm_features, 
-                        dropout_prop  = 0.25, 
-                        l             = 10, 
+                        dropout_prop  = dro, 
+                        l             = lay, 
                         n             = nod, 
                         loss_function = los, 
                         w_time        = wti, 

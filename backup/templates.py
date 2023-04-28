@@ -83,7 +83,7 @@ def spaceNNtime_sim(sim, exp, nam, met, snp, pre, lay, dro, typ, cov, std, err, 
 	return inputs, outputs, options, spec
 
 ##B.3.
-def spaceNNtime_AADR(exp, nam, met, cro, sta, end, dmt, pre, typ, los, nfe, nla, wti, wsp, wsa, nod, mem, que, tim):
+def spaceNNtime_AADR(exp, nam, met, cro, sta, end, dmt, pre, lay, dro, typ, los, nfe, nla, wti, wsp, wsa, nod, mem, que, tim):
 	'''
 	Runs spaceNNtime for simulated data
 	'''
@@ -105,7 +105,7 @@ def spaceNNtime_AADR(exp, nam, met, cro, sta, end, dmt, pre, typ, los, nfe, nla,
 	mkdir -p /home/moicoll/spaceNNtime/sandbox/AADR/{exp}/models
 	mkdir -p /home/moicoll/spaceNNtime/sandbox/AADR/{exp}/history_plots
 
-	python /home/moicoll/spaceNNtime/scripts/spaceNNtime_AADR.py {exp} {nam} {met} {cro} {sta} {end} {dmt} {pre} {typ} {los} {nfe} {nla} {wti} {wsp} {wsa} {nod}
+	python /home/moicoll/spaceNNtime/scripts/spaceNNtime_AADR.py {exp} {nam} {met} {cro} {sta} {end} {dmt} {pre} {lay} {dro} {typ} {los} {nfe} {nla} {wti} {wsp} {wsa} {nod}
 
 	touch /home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_{sta}_{end}.DONE
 	echo ""
@@ -114,8 +114,8 @@ def spaceNNtime_AADR(exp, nam, met, cro, sta, end, dmt, pre, typ, los, nfe, nla,
 	echo "JOBINFO"
 	echo "======="
 	jobinfo $PBS_JOBID
-	'''.format(exp = exp, nam = nam, met = met, pre = pre, typ = typ, cro = cro, sta = sta, end = end, 
-	           dmt = dmt, los = los, nfe = nfe, nla = nla, wti = wti, wsp = wsp, wsa = wsa, nod = nod)
+	'''.format(exp = exp, nam = nam, met = met, pre = pre, lay = lay, dro = dro, typ = typ, cro = cro, sta = sta, 
+	           end = end, dmt = dmt, los = los, nfe = nfe, nla = nla, wti = wti, wsp = wsp, wsa = wsa, nod = nod)
 
 
 	return inputs, outputs, options, spec

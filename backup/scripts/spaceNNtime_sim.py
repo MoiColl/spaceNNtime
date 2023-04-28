@@ -24,7 +24,8 @@ wsp = float(wsp)
 ts            = tskit.load("/home/moicoll/spaceNNtime/data/{sim}/tree.trees".format(sim = sim))
 metadata      = pd.read_csv("/home/moicoll/spaceNNtime/data/{sim}/metadata/{met}.txt".format(sim = sim, met = met), delimiter = "\t")
 
-if nam not in ["loss", "reference", "downsample", "sampling", "snp_density", "prediction", "n_nodes"]:
+
+if nam not in ["loss", "reference", "downsample", "sampling", "snp_density", "prediction", "n_nodes", "dropout", "layers"]:
     cov = simGL.depth_per_haplotype(rng = np.random.default_rng(1234), mean_depth = cov, std_depth = std, n_hap = metadata.shape[0]*2, ploidy = 2)
     pd.DataFrame({"ind" : metadata["ind_id"],
                   "co1" : cov.reshape(-1, 2)[:, 0],
