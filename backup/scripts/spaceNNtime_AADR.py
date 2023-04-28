@@ -56,7 +56,12 @@ elif "timing" in wsa:
     wsa = np.ones(metadata.shape[0])
     wsa[metadata["datmet"] != "Context"] = timing_val 
 elif wsa == "datstd":
-    wsa = 1-(metadata["datstd"]/metadata["datmet"])
+    wsa = (1-(metadata["datstd"].to_numpy()/metadata["time"].to_numpy()))
+    print("sdkfjasñlkdfjañlskdjf")
+    print("sdkfjasñlkdfjañlskdjf")
+    print("sdkfjasñlkdfjañlskdjf")
+    print(wsa)
+    print(wsa.shape)
 else:
     sys.exit("No correct wsa variable")
 
