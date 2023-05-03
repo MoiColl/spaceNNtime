@@ -379,16 +379,16 @@ def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256,
 
 
 #B.6
-def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks, sample_weight):
+def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks, tra_sample_weight, val_sample_weight):
     history = model.fit(x                    = tra_fea, 
                         y                    = tra_lab,
                         epochs               = 5000,
                         batch_size           =   32,
                         shuffle              = True,
                         verbose              = False,
-                        validation_data      = (val_fea, val_lab),
+                        validation_data      = (val_fea, val_lab, val_sample_weight),
                         callbacks            = callbacks,
-                        sample_weight        = sample_weight)
+                        sample_weight        = tra_sample_weight)
     
     return history
 

@@ -440,6 +440,6 @@ dependencies:
   - zlib=1.2.12=h166bdaf_2
   - zstd=1.5.2=h8a70e8d_2
   - pip:
-    - numpy==1.23.1
-    - simgl==0.1
+      - numpy==1.23.1
+      - simgl==0.1
 prefix: /home/moicoll/miniconda3/envs/sNNt_au

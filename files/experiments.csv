@@ -68,3 +68,5 @@ europe;66;layers;5;1500;1;sNNt;2;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64;1g
 europe;67;layers;5;1500;1;sNNt;6;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;0
 europe;68;layers;5;1500;1;sNNt;14;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;0
 europe;69;layers;5;1500;1;sNNt;18;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64;1g;normal;08:00:00;0
+europe;70;loss;5;1500;1;space;10;0.25;gt;0;0;0;edl;None;None;1;1;None;64;1g;normal;08:00:00;0
+europe;71;loss;5;1500;1;space;10;0.25;gt;0;0;0;mse;None;None;1;1;None;64;1g;normal;08:00:00;0

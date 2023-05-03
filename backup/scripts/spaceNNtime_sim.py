@@ -76,13 +76,14 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
 
     checkpoint, earlystop, reducelr = callbacks(weights_file_name = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models/group{i}_weights.hdf5".format(sim = sim, exp = exp, i = i))
 
-    history = train_spaceNNtime(model         = model, 
-                                tra_fea       = input[:, tra_val_tes[i]["tra"]].T, 
-                                tra_lab       = norm_labels(output[tra_val_tes[i]["tra"], :]), 
-                                val_fea       = input[:, tra_val_tes[i]["val"]].T, 
-                                val_lab       = norm_labels(output[tra_val_tes[i]["val"], :]),
-                                callbacks     = [checkpoint, earlystop, reducelr],
-                                sample_weight = wsa[tra_val_tes[i]["tra"]])
+    history = train_spaceNNtime(model             = model, 
+                                tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
+                                tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]), 
+                                val_fea           = input[:, tra_val_tes[i]["val"]].T, 
+                                val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]),
+                                callbacks         = [checkpoint, earlystop, reducelr],
+                                tra_sample_weight = wsa[tra_val_tes[i]["tra"]],
+                                val_sample_weight = wsa[tra_val_tes[i]["val"]])
 
     plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots/group{i}_history.png".format(sim = sim, exp = exp, i = i))
 

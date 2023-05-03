@@ -98,13 +98,14 @@ for j, i in enumerate(range(sta_batch, len(tra_val_tes))):
 
     checkpoint, earlystop, reducelr = callbacks(weights_file_name = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/models/group{i}_{cro}_{sta}_{end}_weights.hdf5".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
 
-    history = train_spaceNNtime(model         = model, 
-                                tra_fea       = input[:, tra_val_tes[i]["tra"]].T, 
-                                tra_lab       = norm_labels(output[tra_val_tes[i]["tra"], :]), 
-                                val_fea       = input[:, tra_val_tes[i]["val"]].T, 
-                                val_lab       = norm_labels(output[tra_val_tes[i]["val"], :]),
-                                callbacks     = [checkpoint, earlystop, reducelr],
-                                sample_weight = wsa[tra_val_tes[i]["tra"]])
+    history = train_spaceNNtime(model             = model, 
+                                tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
+                                tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]), 
+                                val_fea           = input[:, tra_val_tes[i]["val"]].T, 
+                                val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]),
+                                callbacks         = [checkpoint, earlystop, reducelr],
+                                tra_sample_weight = wsa[tra_val_tes[i]["tra"]],
+                                val_sample_weight = wsa[tra_val_tes[i]["val"]])
 
     plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/history_plots/group{i}_{cro}_{sta}_{end}_history.png".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
 
