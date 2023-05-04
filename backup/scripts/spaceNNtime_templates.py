@@ -226,19 +226,23 @@ def get_input_AADR(metadata, chrom, start, end):
     snp     = pd.read_table("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public_nospaces.snp", index_col = None, header = None, names = ["snp", "chr", "gen", "pos", "ref", "alt"])
 
     snp_idx = np.array([i for i in snp[(snp.chr == chrom) & (snp.pos >= start) & (snp.pos < end)].index])
+    print()
     geno = []
-    with open("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public.eigenstratgeno", "r") as f:
-        for i, l in enumerate(f):
-            if i >= snp_idx[0] and i <= snp_idx[-1]:
-                geno.append([int(x) for x in l.strip()])
-            elif i > snp_idx[-1]:
-                break
-            
-    geno = np.array(geno)[:, metadata.index.to_numpy()]
+    if snp_idx.shape[0]:
+        with open("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public.eigenstratgeno", "r") as f:
+            for i, l in enumerate(f):
+                if i >= snp_idx[0] and i <= snp_idx[-1]:
+                    geno.append([int(x) for x in l.strip()])
+                elif i > snp_idx[-1]:
+                    break
+                
+        geno = np.array(geno)[:, metadata.index.to_numpy()]
 
-    geno[geno == 9] = -1
+        geno[geno == 9] = -1
 
-    return geno, snp[(snp.chr == chrom) & (snp.pos >= start) & (snp.pos < end)].pos.to_numpy()
+        return geno, snp[(snp.chr == chrom) & (snp.pos >= start) & (snp.pos < end)].pos.to_numpy()
+    else:
+        return None, None
 
 
 def get_output(pre, metadata):
@@ -379,14 +383,14 @@ def spaceNNtime(output_shape, norm = None, dropout_prop = 0.25, l = 10, n = 256,
 
 
 #B.6
-def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks, tra_sample_weight, val_sample_weight):
+def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks, tra_sample_weight):#, val_sample_weight):
     history = model.fit(x                    = tra_fea, 
                         y                    = tra_lab,
                         epochs               = 5000,
                         batch_size           =   32,
                         shuffle              = True,
                         verbose              = False,
-                        validation_data      = (val_fea, val_lab, val_sample_weight),
+                        validation_data      = (val_fea, val_lab),#, val_sample_weight),
                         callbacks            = callbacks,
                         sample_weight        = tra_sample_weight)
     

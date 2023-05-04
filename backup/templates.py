@@ -27,9 +27,12 @@ def all_done_windows(inp, exp, cro, sta, end, win):
 
 	for s in `seq {sta} {win} $(({end}-{win}))`;
 	do
-		awk '{{if(NR > 1){{print}}}}' ${{working_dir}}/pred_{cro}_${{s}}_$((s+{win})).txt >> ${{working_dir}}/pred_{cro}_{sta}_{end}_{win}.txt
-		sleep 1
-		rm ${{working_dir}}/pred_{cro}_${{s}}_$((s+{win})).txt
+		if [ -f ${{working_dir}}/pred_{cro}_${{s}}_$((s+{win})).txt ]; 
+		then
+			awk '{{if(NR > 1){{print}}}}' ${{working_dir}}/pred_{cro}_${{s}}_$((s+{win})).txt >> ${{working_dir}}/pred_{cro}_{sta}_{end}_{win}.txt
+			sleep 1
+			rm ${{working_dir}}/pred_{cro}_${{s}}_$((s+{win})).txt
+		fi
 	done
 
 	touch /home/moicoll/spaceNNtime/sandbox/completed/AADR_{exp}_{cro}_$(({sta}/1000000))_$(({end}/1000000))_$(({win}/1000000)).DONE

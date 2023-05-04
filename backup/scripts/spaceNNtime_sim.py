@@ -2,6 +2,7 @@ import sys
 import tskit
 import pandas as pd
 import time
+import os
 sys.path.append('scripts/')
 from spaceNNtime_templates import *
 from tensorflow.python.client import device_lib
@@ -26,10 +27,15 @@ metadata      = pd.read_csv("/home/moicoll/spaceNNtime/data/{sim}/metadata/{met}
 
 
 if nam not in ["loss", "reference", "downsample", "sampling", "snp_density", "prediction", "n_nodes", "dropout", "layers"]:
-    cov = simGL.depth_per_haplotype(rng = np.random.default_rng(1234), mean_depth = cov, std_depth = std, n_hap = metadata.shape[0]*2, ploidy = 2)
-    pd.DataFrame({"ind" : metadata["ind_id"],
-                  "co1" : cov.reshape(-1, 2)[:, 0],
-                  "co2" : cov.reshape(-1, 2)[:, 1]}).to_csv("/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/coverage.txt".format(sim = sim, exp = exp), mode='w', header=True, sep = "\t", index = False)
+    cov_file_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/coverage.txt".format(sim = sim, exp = exp)
+    if os.path.isfile(cov_file_path):
+        cov = pd.read_table(cov_file_path)[["co1", "co2"]].to_numpy().reshape(-1)
+    else:
+        ploidy = 2
+        cov = simGL.depth_per_haplotype(rng = np.random.default_rng(1234), mean_depth = cov/ploidy, std_depth = std/ploidy, n_hap = metadata.shape[0]*ploidy, ploidy = ploidy)
+        pd.DataFrame({"ind" : metadata["ind_id"],
+                    "co1" : cov.reshape(-1, 2)[:, 0],
+                    "co2" : cov.reshape(-1, 2)[:, 1]}).to_csv(cov_file_path, mode='w', header=True, sep = "\t", index = False)
 
 if wsa == "None":
     wsa = np.ones(metadata.shape[0])
@@ -82,8 +88,8 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
                                 val_fea           = input[:, tra_val_tes[i]["val"]].T, 
                                 val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]),
                                 callbacks         = [checkpoint, earlystop, reducelr],
-                                tra_sample_weight = wsa[tra_val_tes[i]["tra"]],
-                                val_sample_weight = wsa[tra_val_tes[i]["val"]])
+                                tra_sample_weight = wsa[tra_val_tes[i]["tra"]])
+                                #val_sample_weight = wsa[tra_val_tes[i]["val"]])
 
     plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots/group{i}_history.png".format(sim = sim, exp = exp, i = i))
 
