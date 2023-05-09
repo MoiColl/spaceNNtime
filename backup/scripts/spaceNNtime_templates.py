@@ -280,13 +280,22 @@ def carryon(carryon_file):
         print("No batches run yet. Starting form first batch...\n")
     return start_batch, new_file
 
-def normalizer(nor, input_shape):
+def normalizer(nor, array):
     if nor == "None":
-        return tf.keras.layers.Normalization(input_shape=[input_shape, ], axis = None, mean = 0, variance = 1)
+        mean     = np.array([0.])
+        variance = np.array([1.])
+        layer = tf.keras.layers.Normalization(input_shape=[array.shape[1], ], axis = None, mean = mean, variance = variance)
     elif nor == "Norm0":
-        return tf.keras.layers.Normalization(input_shape=[input_shape, ], axis = None)
+        mean     = array.mean(axis = None)
+        variance = array.var(axis = None)
+        layer = tf.keras.layers.Normalization(input_shape=[array.shape[1], ], axis = None, mean = mean, variance = variance)
     elif nor == "Norm1":
-        return tf.keras.layers.Normalization(input_shape=[input_shape, ], axis = -1)
+        mean     = array.mean(axis = 0).reshape(1, -1)
+        variance = array.var(axis = 0).reshape(1, -1)
+        layer = tf.keras.layers.Normalization(input_shape=[array.shape[1], ], axis = -1)
+    if nor != "None":
+        layer.adapt(array)
+    return layer, mean, variance
 
 #B.6
 def callbacks(weights_file_name):

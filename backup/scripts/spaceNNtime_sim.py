@@ -61,12 +61,8 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
     i = str(i)
     print("Processing batch {}".format(i), flush = True)
 
-    norm_features = normalizer(nor = nfe, input_shape = input.T.shape[1])
-    if nfe != "None":
-        norm_features.adapt(input[:, tra_val_tes[i]["tra"]].T)
-    norm_labels   = normalizer(nor = nla, input_shape = output.shape[1])
-    if nla != "None":
-        norm_labels.adapt(output[tra_val_tes[i]["tra"], :])
+    norm_features, mean_features, variance_features = normalizer(nor = nfe, array = input[:, tra_val_tes[i]["tra"]].T)
+    norm_labels,   mean_labels,   variance_labels   = normalizer(nor = nla, array = output[tra_val_tes[i]["tra"]])
 
     model = spaceNNtime(output_shape  = output.shape[1], 
                         norm          = norm_features, 
@@ -94,7 +90,8 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
     plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots/group{i}_history.png".format(sim = sim, exp = exp, i = i))
 
     pred = model.predict(input[:, tra_val_tes[i]["tes"]].T)
-    
+    pred = (pred*np.sqrt(variance_labels))+mean_labels
+
     new_file  = write_pred(sim       = sim, 
                            exp       = exp, 
                            nam       = nam, 

@@ -7,9 +7,9 @@ europe;5;reference;5;1500;1;sNNt;10;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64
 europe;6;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;hdtd;None;None;1;100000;None;64;1g;normal;08:00:00;16:55:45
 europe;7;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;hdtd;None;None;1;1000000;None;64;1g;normal;08:00:00;07:55:06
 europe;8;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;mse;None;None;1;1;None;64;1g;normal;08:00:00;12:17:02
-europe;9;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;mse;None;Norm1;1;10000;None;64;1g;normal;08:00:00;08:28:27
+europe;9;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;mse;None;Norm1;1;1;None;64;1g;normal;08:00:00;08:28:27
 europe;10;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;edl;None;None;1;1;None;64;1g;normal;08:00:00;12:47:35
-europe;11;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;edl;None;Norm1;1;10000;None;64;1g;normal;08:00:00;09:00:21
+europe;11;loss;5;1500;1;sNNt;10;0.25;gt;0;0;0;edl;None;Norm1;1;1;None;64;1g;normal;08:00:00;09:00:21
 europe;12;downsample;12;15000;1;sNNt;10;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64;15g;normal;1-00:00:00;0
 europe;13;downsample;13;10000;1;sNNt;10;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64;20g;normal;1-00:00:00;0
 europe;14;downsample;14;5000;1;sNNt;10;0.25;gt;0;0;0;hdtd;None;None;1;10000;None;64;20g;normal;1-00:00:00;0
