@@ -10,7 +10,7 @@ from tensorflow.python.client import device_lib
 print("Which devices are available?")
 print(device_lib.list_local_devices())
 
-sim, exp, nam, met, snp, pre, lay, dro, typ, cov, std, err, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
+sim, exp, nam, met, snp, pre, lay, dro, typ, cov, std, err, los, nfe, nla, wti, wsp, wsa, nod, dat = sys.argv[1:]
 snp = float(snp)
 lay = int(lay)
 dro = float(dro)
@@ -26,7 +26,7 @@ ts            = tskit.load("/home/moicoll/spaceNNtime/data/{sim}/tree.trees".for
 metadata      = pd.read_csv("/home/moicoll/spaceNNtime/data/{sim}/metadata/{met}.txt".format(sim = sim, met = met), delimiter = "\t")
 
 
-if nam not in ["loss", "reference", "downsample", "sampling", "snp_density", "prediction", "n_nodes", "dropout", "layers"]:
+if nam not in ["loss", "reference", "downsample", "sampling", "snp_density", "prediction", "n_nodes", "dropout", "layers", "fasttest"]:
     cov_file_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/coverage.txt".format(sim = sim, exp = exp)
     if os.path.isfile(cov_file_path):
         cov = pd.read_table(cov_file_path)[["co1", "co2"]].to_numpy().reshape(-1)
@@ -64,7 +64,7 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
 
     norm_features, mean_features, variance_features = normalizer(nor = nfe, array = input[:, tra_val_tes[i]["tra"]].T)
     norm_labels,   mean_labels,   variance_labels   = normalizer(nor = nla, array = output[tra_val_tes[i]["tra"]])
-
+    
     model = spaceNNtime(output_shape  = output.shape[1], 
                         norm          = norm_features, 
                         dropout_prop  = dro, 
@@ -78,15 +78,24 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
         model.summary()
 
     checkpoint, earlystop, reducelr = callbacks(weights_file_name = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models/group{i}_weights.hdf5".format(sim = sim, exp = exp, i = i))
+    if dat == "default":
+        history = train_spaceNNtime(model             = model, 
+                                    tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
+                                    tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]).numpy(), 
+                                    val_fea           = input[:, tra_val_tes[i]["val"]].T, 
+                                    val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]).numpy(),
+                                    callbacks         = [checkpoint, earlystop, reducelr],
+                                    tra_sample_weight = wsa[tra_val_tes[i]["tra"]])
+                                    #val_sample_weight = wsa[tra_val_tes[i]["val"]])
 
-    history = train_spaceNNtime(model             = model, 
-                                tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
-                                tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]), 
-                                val_fea           = input[:, tra_val_tes[i]["val"]].T, 
-                                val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]),
-                                callbacks         = [checkpoint, earlystop, reducelr],
-                                tra_sample_weight = wsa[tra_val_tes[i]["tra"]])
-                                #val_sample_weight = wsa[tra_val_tes[i]["val"]])
+    elif dat == "custom":
+        tra_gen = CustomDataGen(x = input[:, tra_val_tes[i]["tra"]].T, y = norm_labels(output[tra_val_tes[i]["tra"], :]).numpy(), x_weights = wsa[tra_val_tes[i]["tra"]])
+        val_gen = CustomDataGen(x = input[:, tra_val_tes[i]["val"]].T, y = norm_labels(output[tra_val_tes[i]["val"], :]).numpy(), x_weights = np.array([]))
+
+        history = train_spaceNNtime_datagen(model             = model, 
+                                            tra_gen           = tra_gen, 
+                                            val_gen           = val_gen, 
+                                            callbacks         = [checkpoint, earlystop, reducelr])
 
     plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots/group{i}_history.png".format(sim = sim, exp = exp, i = i))
 

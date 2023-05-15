@@ -9,6 +9,46 @@ import tensorflow as tf
 from tensorflow.keras import backend as K
 import simGL
 
+
+class CustomDataGen(tf.keras.utils.Sequence):
+    '''
+    https://medium.com/analytics-vidhya/write-your-own-custom-data-generator-for-tensorflow-keras-1252b64e41c3
+    https://www.tensorflow.org/api_docs/python/tf/keras/utils/Sequence
+    https://keras.io/api/models/model_training_apis/
+    '''
+    def __init__(self, x, y, batch_size = 32, x_weights = np.array([]), shuffle = True):
+        self.x = x
+        self.y = y
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        if x_weights.shape == (0,):
+            self.x_weights = np.ones(x.shape[0])
+        else:
+            self.x_weights = x_weights
+    
+    def __len__(self):
+        return int(np.ceil(self.x.shape[1] / self.batch_size))
+
+    def on_epoch_end(self):
+        if self.shuffle:
+            i = np.arange(self.x.shape[0])
+            np.random.shuffle(i)
+            self.x = self.x[i]
+            self.y = self.y[i]
+            self.x_weights = self.x_weights[i]
+
+    def __getitem__(self, idx):
+        low = idx * self.batch_size
+        # Cap upper bound at array length; the last batch may be smaller
+        # if the total number of items is not a multiple of batch size.
+        high = min(low + self.batch_size, len(self.x))
+        batch_x = self.x[low:high]
+        batch_y = self.y[low:high]
+        batch_x_weights = self.x_weights[low:high]
+
+        return batch_x, batch_y, batch_x_weights
+
+
 #B. Functions
 #B.1
 def generate_tra_val_tes(samples, n_tes = 3, p_tra = 0.9, max_tes_groups = None):
@@ -225,7 +265,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
 def get_input_AADR(metadata, chrom, start, end):
     snp     = pd.read_table("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public_nospaces.snp", index_col = None, header = None, names = ["snp", "chr", "gen", "pos", "ref", "alt"])
 
-    snp_idx = np.array([i for i in snp[(snp.chr == chrom) & (snp.pos >= start) & (snp.pos < end)].index])
+    snp_idx = np.array([i for i in snp[np.in1d(snp.chr, chrom) & (snp.pos >= start) & (snp.pos < end)].index])
     print()
     geno = []
     if snp_idx.shape[0]:
@@ -240,7 +280,7 @@ def get_input_AADR(metadata, chrom, start, end):
 
         geno[geno == 9] = -1
 
-        return geno, snp[(snp.chr == chrom) & (snp.pos >= start) & (snp.pos < end)].pos.to_numpy()
+        return geno, snp[np.in1d(snp.chr, chrom) & (snp.pos >= start) & (snp.pos < end)].pos.to_numpy()
     else:
         return None, None
 
@@ -396,12 +436,21 @@ def train_spaceNNtime(model, tra_fea, tra_lab, val_fea, val_lab, callbacks, tra_
     history = model.fit(x                    = tra_fea, 
                         y                    = tra_lab,
                         epochs               = 5000,
-                        batch_size           =   32,
+                        batch_size           =   32, 
                         shuffle              = True,
                         verbose              = False,
                         validation_data      = (val_fea, val_lab),#, val_sample_weight),
                         callbacks            = callbacks,
                         sample_weight        = tra_sample_weight)
+    
+    return history
+
+def train_spaceNNtime_datagen(model, tra_gen, val_gen, callbacks):
+    history = model.fit(x                    = tra_gen, 
+                        epochs               = 5000,
+                        verbose              = False,
+                        validation_data      = val_gen,
+                        callbacks            = callbacks)
     
     return history
 

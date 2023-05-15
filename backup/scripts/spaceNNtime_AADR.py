@@ -9,8 +9,10 @@ from tensorflow.python.client import device_lib
 print("Which devices are available?")
 print(device_lib.list_local_devices())
 
-exp, nam, met, cro, sta, end, dmt, pre, lay, dro, typ, los, nfe, nla, wti, wsp, wsa, nod  = sys.argv[1:]
-cro = int(cro)
+exp, nam, met, cro, sta, end, dmt, pre, lay, dro, typ, los, nfe, nla, wti, wsp, wsa, nod, dat  = sys.argv[1:]
+crl = [int(x) for x in cro.split("t")]
+if len(crl) > 1:
+    crl = [x for x in range(crl[0], crl[1]+1)]
 sta = int(int(sta)*1e6)
 end = int(int(end)*1e6)
 lay = int(lay)
@@ -33,8 +35,8 @@ print(metadata)
 
 
 print("Reading input...")
-input, snp    = get_input_AADR(metadata, cro, sta, end)
-if input != None:
+input, snp    = get_input_AADR(metadata, crl, sta, end)
+if type(input) != type(None):
         
     print("Reading output...")
     output        = get_output(pre, metadata)
@@ -76,12 +78,15 @@ if input != None:
         i = str(i)
         print("Processing batch {}".format(i), flush = True)
 
-        norm_features = normalizer(nor = nfe, input_shape = input.T.shape[1])
-        if nfe != "None":
-            norm_features.adapt(input[:, tra_val_tes[i]["tra"]].T)
-        norm_labels   = normalizer(nor = nla, input_shape = output.shape[1])
-        if nla != "None":
-            norm_labels.adapt(output[tra_val_tes[i]["tra"], :])
+        # norm_features = normalizer(nor = nfe, input_shape = input.T.shape[1])
+        # if nfe != "None":
+        #     norm_features.adapt(input[:, tra_val_tes[i]["tra"]].T)
+        # norm_labels   = normalizer(nor = nla, input_shape = output.shape[1])
+        # if nla != "None":
+        #     norm_labels.adapt(output[tra_val_tes[i]["tra"], :])
+
+        norm_features, mean_features, variance_features = normalizer(nor = nfe, array = input[:, tra_val_tes[i]["tra"]].T)
+        norm_labels,   mean_labels,   variance_labels   = normalizer(nor = nla, array = output[tra_val_tes[i]["tra"]])
 
         model = spaceNNtime(output_shape  = output.shape[1], 
                             norm          = norm_features, 
@@ -96,20 +101,38 @@ if input != None:
             model.summary()
 
         checkpoint, earlystop, reducelr = callbacks(weights_file_name = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/models/group{i}_{cro}_{sta}_{end}_weights.hdf5".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
+        if dat == "default":
+            history = train_spaceNNtime(model             = model, 
+                                        tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
+                                        tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]), 
+                                        val_fea           = input[:, tra_val_tes[i]["val"]].T, 
+                                        val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]),
+                                        callbacks         = [checkpoint, earlystop, reducelr],
+                                        tra_sample_weight = wsa[tra_val_tes[i]["tra"]])
+                                        #val_sample_weight = wsa[tra_val_tes[i]["val"]])
+        elif dat == "custom":
+            tra_gen = CustomDataGen(x = input[:, tra_val_tes[i]["tra"]].T, y = norm_labels(output[tra_val_tes[i]["tra"], :]).numpy(), x_weights = wsa[tra_val_tes[i]["tra"]])
+            val_gen = CustomDataGen(x = input[:, tra_val_tes[i]["val"]].T, y = norm_labels(output[tra_val_tes[i]["val"], :]).numpy(), x_weights = np.array([]))
 
-        history = train_spaceNNtime(model             = model, 
-                                    tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
-                                    tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]), 
-                                    val_fea           = input[:, tra_val_tes[i]["val"]].T, 
-                                    val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]),
-                                    callbacks         = [checkpoint, earlystop, reducelr],
-                                    tra_sample_weight = wsa[tra_val_tes[i]["tra"]])
-                                    #val_sample_weight = wsa[tra_val_tes[i]["val"]])
+            history = train_spaceNNtime_datagen(model             = model, 
+                                                tra_gen           = tra_gen, 
+                                                val_gen           = val_gen, 
+                                                callbacks         = [checkpoint, earlystop, reducelr])
+        
+        
+        if dat == "default":
+            plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/history_plots/group{i}_{cro}_{sta}_{end}_history.png".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
+        elif dat == "custom":
+            hist = pd.DataFrame(history.history)
+            hist['epoch'] = history.epoch
+            hist.to_csv("/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/history_plots/group{i}_{cro}_{sta}_{end}_history_rawdata.csv".format(exp = exp, i = i, cro = cro, sta = sta, end = end), 
+                        mode='w', header=True, sep = "\t", index = False)
+            plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/history_plots/group{i}_{cro}_{sta}_{end}_history.png".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
 
-        plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/history_plots/group{i}_{cro}_{sta}_{end}_history.png".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
 
         pred = model.predict(input[:, tra_val_tes[i]["tes"]].T)
-        
+        pred = (pred*np.sqrt(variance_labels))+mean_labels
+
         new_file  = write_pred_AADR(sim       = "AADR", 
                                     exp       = exp, 
                                     nam       = nam, 

@@ -40,12 +40,11 @@ for i in range(len(experiments)):
 											  cov = experiments["cov"][i], std = experiments["std"][i], err = experiments["err"][i], 
 											  los = experiments["los"][i], nfe = experiments["nfe"][i], nla = experiments["nla"][i], 
 											  wti = experiments["wti"][i], wsp = experiments["wsp"][i], wsa = experiments["wsa"][i], 
-											  nod = experiments["nod"][i], 
+											  nod = experiments["nod"][i], dat = experiments["dat"][i], 
 											  mem = experiments["mem"][i], que = experiments["que"][i], tim = experiments["tim"][i]))
 
 #C.2 AADR data
 for i in range(len(experiments_AADR)):
-	# Run spaceNNtime
 	sta = int(experiments_AADR["sta"][i])
 	end = int(experiments_AADR["end"][i])
 	win = int(experiments_AADR["win"][i])
@@ -58,8 +57,8 @@ for i in range(len(experiments_AADR)):
 											        dro = experiments_AADR["dro"][i], typ = experiments_AADR["typ"][i], 
 													los = experiments_AADR["los"][i], nfe = experiments_AADR["nfe"][i], nla = experiments_AADR["nla"][i], 
 													wti = experiments_AADR["wti"][i], wsp = experiments_AADR["wsp"][i], wsa = experiments_AADR["wsa"][i], 
-													nod = experiments_AADR["nod"][i], mem = experiments_AADR["mem"][i], que = experiments_AADR["que"][i], 
-													tim = experiments_AADR["tim"][i]))
+													nod = experiments_AADR["nod"][i], dat = experiments_AADR["dat"][i], mem = experiments_AADR["mem"][i], 
+													que = experiments_AADR["que"][i], tim = experiments_AADR["tim"][i]))
 		inp.append("/home/moicoll/spaceNNtime/sandbox/completed/AADR_{}_{}_{}_{}.DONE".format(experiments_AADR["exp"][i], experiments_AADR["cro"][i], s, s+win))
 	gwf.target_from_template("sNNt_AADR_{}_{}_{}_{}_{}_{}".format(experiments_AADR["exp"][i], experiments_AADR["nam"][i], experiments_AADR["cro"][i], experiments_AADR["sta"][i], experiments_AADR["end"][i], experiments_AADR["win"][i]), 
 			  					   all_done_windows(inp = inp,                        exp = experiments_AADR["exp"][i], cro = experiments_AADR["cro"][i], 
