@@ -1,10 +1,10 @@
 exp;nam;met;cro;sta;end;win;dmt;pre;lay;dro;typ;los;nfe;nla;wti;wsp;wsa;nod;dat;mem;que;tim;tto
 1;loss;1;1;10;20;10;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;1000;None;64;default;8g;normal;16:00:00;00:00:00
-2;general;1;1;0;100;10;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;8g;normal;16:00:00;00:00:00
-2;general;1;2;0;100;10;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;8g;normal;16:00:00;00:00:00
+2;general;1;1;0;250;10;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;8g;normal;16:00:00;00:00:00
+2;general;1;2;0;250;10;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;8g;normal;16:00:00;00:00:00
 3;loss;1;1;10;20;10;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;100000;None;64;default;8g;normal;16:00:00;00:00:00
-4;allwindow;1;1;0;100;100;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;50g;normal;1-00:00:00;00:00:00
-4;allwindow;1;2;0;100;100;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;50g;normal;1-00:00:00;00:00:00
+4;allwindow;1;1;0;250;100;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;50g;normal;1-00:00:00;00:00:00
+4;allwindow;1;2;0;250;100;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;50g;normal;1-00:00:00;00:00:00
 4;allwindow;1;1;0;250;1000;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;100g;gpu;1-00:00:00;00:00:00
 4;allwindow;1;2;0;250;1000;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;default;100g;gpu;1-00:00:00;00:00:00
 4;allwindow;1;1t2;0;250;1000;"sntind_and_datmet_in_[\""Direct\"",\""Known\""]";sNNt;10;0.25;gt;hdtd;None;None;1;10000;None;64;custom;100g;gpu;1-00:00:00;00:00:00
