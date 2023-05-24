@@ -1,5 +1,6 @@
 data/*/*.*
-data/europe/metadata/*
+!data/europe/tree.trees
+!data/europe/metadata.txt
 files/neo.*
 files/igsr_1KGPhase3_populations.tsv
 files/igsr_1KGPhase3_samples.tsv
@@ -23,3 +24,4 @@ backup/scripts/simGL/
 **/._.DS_Store
 backup/jupyternotebooks/mesoneo_dataexplore.ipynb
 backup/jupyternotebooks/neo.impute.1000g.sampleInfo_nospaces.tsv
+.Rproj.user

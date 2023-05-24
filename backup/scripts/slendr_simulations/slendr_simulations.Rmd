@@ -1,0 +1,414 @@
+---
+title: "slendr_simulations"
+author: "Moises Coll Macia"
+date: '2023-05-23'
+output: html_document
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+# Slendr simulations
+
+## 0. Library, packages and global variables
+
+```{r}
+# install.packages("renv")
+# 
+# renv::init()
+# 
+# install.packages("tidyverse")
+# install.packages("ggplot2")
+# install.packages("cowplot")
+# install.packages("sf")
+# install.packages("rnaturalearth")
+# install.packages("rnaturalearthdata")
+# install.packages("slendr")
+# install.packages("devtools")
+# install.packages("magick")
+# install.packages("gifski")
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(gganimate)
+library(slendr)
+#slendr::setup_env()
+slendr::init_env()
+```
+
+```{r}
+simulation_path = "../../../data/europe"
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+colors = gg_color_hue(6)
+col_pop = c("AFR" = colors[1], "OOA" = colors[2], "EHG" = colors[3],
+            "ANA" = colors[4], "EUR" = colors[5], "YAM" = colors[6])
+
+```
+
+## 1. Functions
+
+### A. Python Functions
+
+### B. R Functions
+
+```{r}
+sampling_uniform_intime <- function(n, pop_timing, pops_list, gen_time = 30, min = 500, max = 51000){
+    samples  <- data.frame()
+    i = 0
+    while(samples %>% nrow() < 1 || sum(samples$n) < n){
+        
+        t = round(runif(n = 1, min = min, max = max))
+
+        if(pop_timing %>% dplyr::filter(start > t+gen_time, end < t-gen_time) %>% nrow() > 0){
+            i = i + 1
+     
+            pop_idx  = pop_timing %>% 
+                            dplyr::filter(start > t+gen_time, end < t-gen_time) %>% 
+                            dplyr::sample_n(1) %>% 
+                            dplyr::pull(index)
+
+            pop_nam  = pop_timing %>% dplyr::filter(index == pop_idx) %>% dplyr::pull(pop)
+
+            if(samples %>% nrow() > 1 && samples %>% dplyr::filter(time  == t, pop == pop_nam) %>% nrow() > 0){
+                
+                samples <- samples %>% dplyr::mutate(n = ifelse(time == t & pop == pop_nam, n+1, n))
+                
+            }else{
+
+                samples <- rbind(samples, schedule_sampling(model, times = t, list( pops_list[[pop_idx]], 1 )))
+            }
+        }
+    }
+    return(samples)
+}
+```
+
+## 2. Slendr - european pop history simulation and temporal uniform sampling
+
+### A. Setup map and regions
+
+```{r}
+map <- world(xrange = c(-13, 70), yrange = c(18, 65),crs = "EPSG:3035")
+print(map)
+plot_map(map)
+```
+
+```{r}
+africa <- region(
+  "Africa", map,
+  polygon = list(c(-18, 20), c(38, 20), c(30, 33),
+                 c(20, 33), c(10, 38), c(-6, 35))
+)
+europe <- region(
+  "Europe", map,
+  polygon = list(
+    c(-8, 35), c(-5, 36), c(10, 38), c(20, 35), c(25, 35),
+    c(33, 45), c(20, 58), c(-5, 60), c(-15, 50)
+  )
+)
+anatolia <- region(
+  "Anatolia", map,
+  polygon = list(c(28, 35), c(40, 35), c(42, 40),
+                 c(30, 43), c(27, 40), c(25, 38))
+)
+
+plot_map(africa, europe, anatolia)
+```
+
+### B. Setup populations, their demographic history and admixtures
+
+```{r}
+# African ancestral population
+# ----------------------------
+
+afr <- population("AFR", time = 52000, N = 3000, map = map, polygon = africa)
+
+# population of the first migrants out of Africa
+# ----------------------------------------------
+
+ooa <- population("OOA", parent = afr, time = 51000, N = 500, remove = 25000, center = c(33, 30), radius = 400e3) %>%
+            move(trajectory = list(c(40, 30), c(50, 30), c(60, 40)), start = 50000, end = 40000, snapshots = 20)
+
+# Eastern hunter-gatherers
+# ------------------------    
+    
+ehg <- population("EHG", parent = ooa, time = 28000, N = 1000, remove = 6000, polygon = list(c(26, 55), c(38, 53), c(48, 53), c(60, 53), c(60, 60), c(48, 63), c(38, 63), c(26, 60)))
+
+# European population
+# -------------------
+
+eur <- population( name = "EUR", parent = ehg, time = 25000, N = 2000, polygon = europe)
+
+# Anatolian farmers
+# -----------------
+
+ana <- population( name = "ANA", time = 28000, N = 3000, parent = ooa, remove = 4000, center = c(34, 38), radius = 500e3, polygon = anatolia) %>%
+        expand_range(by = 2500e3, start = 10000, end = 7000, polygon = join(europe, anatolia), snapshots = 20)
+
+# Yamnaya steppe population
+# -------------------------
+    
+yam <- population( name = "YAM", time = 7000, N = 500, parent = ehg, remove = 2500, polygon = list(c(26, 50), c(38, 49), c(48, 50), c(48, 56), c(38, 59), c(26, 56))) %>%
+            move(trajectory = list(c(15, 50)), start = 5000, end = 3000, snapshots = 10)
+
+# Gene flow events
+# ----------------
+    
+gf <- list(
+  gene_flow(from = ana, to = yam, rate = 0.5,  start = 6500, end = 6400, overlap = FALSE),
+  gene_flow(from = ana, to = eur, rate = 0.5,  start = 8000, end = 6000),
+  gene_flow(from = yam, to = eur, rate = 0.75, start = 4000, end = 3000)
+)
+    
+plot_map(afr, ooa, ehg, eur, ana, yam)
+```
+
+### C. Compile the model and visualize it
+
+```{r}
+if(file.exists(paste(simulation_path, "/populations.tsv", sep = "" ))){
+    model <- read_model(simulation_path)
+}else{
+    model <- compile_model(
+      populations      = list(afr, ooa, ehg, eur, ana, yam), 
+      gene_flow        = gf,
+      generation_time  = 30,
+      resolution       = 10e3,                     # resolution in meters per pixel
+      competition      = 130e3, mating = 100e3,    # spatial interaction in SLiM
+      dispersal        = 70e3,                     # how far will offspring end up from their parents
+      path             = simulation_path, 
+      overwrite        = TRUE
+    )
+}
+
+model
+```
+
+This next cell opens a shiny app to explore the model further
+
+```{r}
+#explore_model(model)
+```
+
+```{r}
+plot_grid(
+    plot_map(afr, ooa, ehg, eur, ana, yam),
+    plot_model(model) + ggplot2::theme(legend.position = "none"))
+```
+
+### D. Scheduling sampling individuals
+
+I've made my own function to sample uniform in time but I'm using a `slendr` function under the hood. This function takes lots of time to run.
+
+```{r}
+set.seed(1234)
+
+pops_list  <- list(afr, ooa, ehg, eur, ana, yam)
+
+pop_timing <- data.frame(pop   = c("AFR", "OOA", "EHG", "EUR", "ANA", "YAM"),
+                         start = c(52000, 51000, 28000, 25000, 28000,  7000),
+                         end   = c(    0, 25000,  6000,     0,  4000,  2500),
+                         index = c(    1,     2,     3,     4,     5,     6)) %>%
+                        dplyr::filter(pop != "AFR")
+
+if(! file.exists(paste(simulation_path, "/input_slim_sampling.tsv", sep = ""))){
+    print("File does not exist, creating sampling dataframe")
+    samples    <- sampling_uniform_intime(15000, pop_timing, pops_list)
+    write.table(samples, file = paste(simulation_path, "/input_slim_sampling.tsv", sep = ""), quote=FALSE, col.names=TRUE)
+}else{
+    print("File exist, reading...")
+    samples    <- read.table(paste(simulation_path, "/input_slim_sampling.tsv", sep = ""), header = T)
+}
+head(samples)
+```
+
+```{r}
+samples %>% 
+  dplyr::summarize(n = sum(n)) %>%
+  pull(n)
+```
+
+```{r}
+samples %>% summary()
+```
+
+```{r}
+samples %>%
+  group_by(pop) %>%
+  summarize(max_time = max(time), min_time = min(time))
+```
+
+```{r}
+read.table(file.path(simulation_path, "populations.tsv"), header = TRUE)
+```
+So, from the dataframe above, we extract the following dictionary
+
+```{r}
+ids_pop = c("0" = "AFR",
+            "1" = "OOA",
+            "2" = "EHG", 
+            "3" = "ANA",
+            "4" = "EUR",
+            "5" = "YAM")
+ids_pop
+```
+
+
+```{r}
+plot_grid(
+
+    samples %>%
+        tidyr::uncount(n) %>%
+        dplyr::mutate(pop = factor(pop, levels = c("OOA", "EHG", "ANA", "EUR", "YAM"))) %>%
+        ggplot() +
+        geom_jitter(aes(x = pop, y = time/1000, color = pop)) +
+        scale_color_manual(values=col_pop) +
+        xlab("") +
+        ylab("Time (years x1000)") +
+        theme_light() +
+        theme(legend.position = "none"),
+  
+    samples %>%
+        tidyr::uncount(n) %>%
+        ggplot() +
+        geom_histogram(aes(y = time, fill = pop), bins = 30) +
+        theme_light() +
+        scale_fill_manual(values=col_pop) +
+        theme(axis.ticks.y = element_blank(), axis.title.y = element_blank(), axis.text.y= element_blank(), legend.position = "none"),
+
+    rel_widths= c(2, 1)) 
+```
+
+### E. Simulate
+
+```{r}
+if(file.exists(paste(simulation_path, "/output_slim.trees", sep = ""))){
+    print("Simulations already done!")
+}else{
+    slim(
+      model              = model,
+      sequence_length    = 1e6, 
+      recombination_rate = 1e-8, # simulate only a single locus
+      samples            = samples,
+      output             = paste(simulation_path, "/output_slim.trees", sep = ""),
+      method             = "batch", # change to "gui" to execute the model in SLiMgui
+      random_seed        = 1234,
+      verbose            = TRUE,
+      load               = FALSE,
+      locations          = paste(simulation_path, "/output_locations.txt", sep = "") # save the location of everyone who ever lived
+
+    )
+}
+```
+
+```{r}
+if(!file.exists(paste(simulation_path, "/sim.gif", sep = ""))){
+    animate_model(model = model,
+                  gif = paste(simulation_path, "/sim.gif", sep = ""),
+                  file = paste(simulation_path, "/output_locations.txt.gz", sep = ""), 
+                  steps = 100, 
+                  width = 500, 
+                  height = 300)
+}
+```
+
+![](../../../data/europe/sim.gif "gif")
+
+## 3. Extract metadata form the simulated data and sanity checks
+
+```{r}
+rec_rate <- 1e-8
+mut_rate <- 1e-8
+ne       <- 3000
+ran_seed <- 1234
+
+model <- read_model(simulation_path)
+
+if(!file.exists(paste(simulation_path, "/tree.trees", sep = ""))){
+  print(paste("The tree file ", simulation_path, "/tree.trees does not exist... Generating it...",  sep = ""))
+  ts    <- ts_load(file               = paste(simulation_path, "/output_slim.trees", sep = ""),
+                   model              = model, 
+                   recapitate         = TRUE, 
+                   simplify           = TRUE,
+                   mutate             = TRUE,
+                   recombination_rate = rec_rate,
+                   mutation_rate      = 1e-8,
+                   Ne                 = ne, 
+                   random_seed        = ran_seed) 
+  
+  ts_save(ts, file = paste(simulation_path, "/tree.trees", sep = ""))
+}else{
+  print(paste("The tree file ", simulation_path, "/tree.trees already exist... Loading it...",  sep = ""))
+  ts    <- ts_load(file = paste(simulation_path, "/tree.trees", sep = ""))
+}
+
+if(!file.exists(paste(simulation_path, "/metadata.txt", sep = ""))){
+  print(paste("The data file ", simulation_path, "/metadata.txt does not exist... Generating it...",  sep = ""))
+  data <- ts_nodes(ts)
+  
+  data.frame(ind_id      = data$ind_id,  
+             pedigree_id = data$pedigree_id, 
+             pop_id      = data$pop_id,         
+             node_id     = data$node_id, 
+             location    = data$location, 
+             time        = data$time,        
+             sampled     = data$sampled) %>%
+      filter(sampled) %>%
+      rowwise() %>% 
+      mutate(lat = st_transform(geometry, 4326)[[1]][2], 
+             lon = st_transform(geometry, 4326)[[1]][1]) %>% 
+             select(-c(geometry, pedigree_id)) %>%
+      group_by(ind_id, pop_id, time, sampled, lat, lon) %>%
+      mutate(n = 1, n = cumsum(n), n = paste("node", n, sep = "")) %>%
+      spread(n, node_id) %>%
+      ungroup() %>%
+      mutate(pop = ids_pop[as.character(pop_id)]) %>%
+      write.table(., file = paste(simulation_path, "/metadata.txt", sep = ""), 
+                  append = FALSE, 
+                  quote = FALSE, 
+                  sep = "\t", 
+                  row.names = FALSE, 
+                  col.names = TRUE)
+}else{
+  print(paste("The tree file ", simulation_path, "/tree.trees already exist...",  sep = ""))
+}
+```
+
+```{r}
+metadata <- read.table(paste(simulation_path, "/metadata.txt", sep = ""), header = T)
+metadata %>% head()
+```
+
+```{r}
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+metadata %>%
+    sample_frac(size = 0.1) %>%
+    mutate(time_bin = trunc(time/5000),
+           time_frame = time%%5000) %>%
+    ggplot() +
+    geom_sf(data = world) +
+    coord_sf(xlim = c(-25, 70), ylim = c(20, 80), expand = FALSE) +
+    geom_point(aes(x = lon, y = lat, color = pop, alpha = time_frame)) + 
+    facet_grid(pop~time_bin) +
+    theme_bw() +
+    scale_color_manual(values=col_pop) +
+    xlab("Longitude") + 
+    ylab("Latitude") 
+```
+
+
+
+
+
