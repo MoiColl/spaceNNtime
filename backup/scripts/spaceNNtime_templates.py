@@ -51,78 +51,45 @@ class CustomDataGen(tf.keras.utils.Sequence):
 
 #B. Functions
 #B.1
-def generate_tra_val_tes(samples, n_tes = 3, p_tra = 0.9, max_tes_groups = None):
+def generate_tra_val_tes(samples, k = 50, p_tra = 0.9, seed = None):
     '''
     Def:
-        This function splits samples into training, validating and test groups. This grouping is repeated such that all samples will be
-        part of the test set only once. The number of test samples are going to be equal to "n_tes" variable. Since the total number of samples might not be multiple of
-        "n_tes" there might be a few test groups with less samples than "n_tes". Once the test samples are chosen randomly in each iteration, the function splits the 
-        rest of the samples into train and validation set with a proportion "p_tra" and 1-"p_tra".
+        This function splits samples into training, validating and test groups into `k` groups. This grouping is done such that all samples will be
+        part of the test set only once (Kfold cross validation). Once the testing samples are selected, the remaining samples are going to be part of the
+        trainging and validation set with proportions equal to `p_tra` and 1-`p_tra` correspondilgy. 
 
-        For those groups that have less than "n_tes" as test samples, there will be "n_tes" - len(test samples) samples that will be disregarded and will
-        not be part of the training nor validation set. This way, we ensure that each sample has been predicted
-        with a model that has been trained with the same number of train and validation samples.
-
-        Finally, each supergroup of train, validation and test sets are going to be included in a dictionary which will be outputed in a file.
-        If the file is already created, it will be read instead of created again.
     Input: 
         - samples : numpy array (n_samples, ) with the samples IDs to be divided into train, validation and test sets. All samples are going to be included
                     only once in one test set.
-        - n_tes   : integer with the test set size. There will be round_up(len(samples)/n_tes) test sets in total.
-        - p_tra   : float number [0-1] proportion of training samples to validation samples. The number of training samples is going to be round down 
+        - k       : number of folds. In other words, number of groups.
+        - p_tra   : float number [0-1] proportion of training samples. The number of training samples is going to be round down 
                     to favor the number of validation samples.
+        - seed    : seed for the random number generator
     
     Output: 
         - tra_val_tes : two level dictionary with:
-            - i : integer corresponding to the index of a set
+            - i : integer in string format which corresponds to the index of a K fold
             - tra|val|tes : numpy array (n, ) with the training, validation and test set IDs respectively.
     '''
+    from sklearn.model_selection import KFold, train_test_split
 
-    n_samples   = samples.shape[0]
-    n_fake      = n_tes - (n_samples%n_tes)
-    n_val       = int(((1-p_tra)*n_samples)+1)
+    rsg = np.random.RandomState(seed = seed)
+
+    kf = KFold(n_splits = k, shuffle = True, random_state = rsg)
+    x  = np.arange(samples.shape[0])
     tra_val_tes = {}
 
-    idx_samples_fake_shuff = np.arange(n_samples+n_fake)
-    np.random.shuffle(idx_samples_fake_shuff) 
-    idx_samples_fake_shuff = idx_samples_fake_shuff.reshape(-1, n_tes)
-
-    if not max_tes_groups or max_tes_groups > idx_samples_fake_shuff.shape[0]:
-        max_tes_groups = idx_samples_fake_shuff.shape[0]
-    
-    for i in range(max_tes_groups):
-        tes                 = idx_samples_fake_shuff[i, :]
+    for i, tra_val_tes_idx in enumerate(kf.split(x)):
         tra_val_tes[str(i)] = {}
-        tes                 = tes[tes < n_samples]
-        non_tra_val         = tes
-
-        while non_tra_val.shape[0] < n_tes:
-            exc = np.random.randint(n_samples, size=1)
-            if exc not in non_tra_val:
-                non_tra_val = np.append(non_tra_val, exc)
-
-        p = np.full((n_samples, ), 1/(n_samples-n_tes))
-        p[non_tra_val] = 0
-
-        val = np.random.choice(np.arange(n_samples), size=n_val, replace=False, p=p)
-
-        tra_bool = np.full((n_samples, ), True)
-        tra_bool[np.concatenate([non_tra_val, val])] = False
-        tra     = np.arange(n_samples)[tra_bool]
-        
-        tra.sort()
-        val.sort()
-        tes.sort()
-
-        tra_val_tes[str(i)]["tra"] = tra.tolist()
-        tra_val_tes[str(i)]["val"] = val.tolist()
-        tra_val_tes[str(i)]["tes"] = tes.tolist()
-
-        
+        tra_val_idx, tes_idx = tra_val_tes_idx
+        tra_idx, val_idx = train_test_split(tra_val_idx, train_size = p_tra,  random_state=rsg, shuffle=True)
+        tra_idx.sort()
+        val_idx.sort()
+        tra_val_tes[str(i)]["tra"], tra_val_tes[str(i)]["val"], tra_val_tes[str(i)]["tes"] = tra_idx.tolist(), val_idx.tolist(), tes_idx.tolist()
     return tra_val_tes
 
 #B.2
-def get_tra_val_tes(samples, file = "", overwrite = False, n_tes = 3, p_tra = 0.9, max_tes_groups = None):
+def get_tra_val_tes(samples, file = "", overwrite = False, k = 50, p_tra = 0.9, seed = None):
     '''
     Def:
         This function generates all the different sets of training, validating and testing sets such that all samples in the "samples" variable
@@ -150,29 +117,39 @@ def get_tra_val_tes(samples, file = "", overwrite = False, n_tes = 3, p_tra = 0.
         if os.path.isfile(file) and not overwrite:
             with open(file, 'r') as tra_val_tes_file:
                 tra_val_tes = json.load(tra_val_tes_file)
-                #tra_val_tes = yaml.load(tra_val_tes_file, Loader=yaml.FullLoader)
         else:
-            tra_val_tes = generate_tra_val_tes(samples, n_tes, p_tra, max_tes_groups)
+            tra_val_tes = generate_tra_val_tes(samples = samples, k = k, p_tra = p_tra, seed = seed)
             with open(file, 'w') as tra_val_tes_file:
                 json.dump(tra_val_tes, tra_val_tes_file)
-                #yaml.dump(tra_val_tes, tra_val_tes_file, default_flow_style=False)
     else:
-        tra_val_tes = generate_tra_val_tes(samples, n_tes, p_tra, max_tes_groups)
+        tra_val_tes = generate_tra_val_tes(samples = samples, k = k, p_tra = p_tra, seed = seed)
         
     return tra_val_tes
 
 #B.3
-def get_input(ts, metadata, snp, typ, cov, err):
+def get_input_simulated_tree(ts, metadata, snp, typ, cov, err):
     '''
     Def :
-        Obtain the allele counts for variant sites from a simulated tree structure (ts) that are not singletons or nearly fixed for a subset 
-        of individuals indicated in a metadata pandas DataFrame.
+        Obtain the allele counts, genotype likelihoods, genotype probablities or other for variant sites from a simulated tree structure (ts) 
+        that are not singletons or nearly fixed for a subset of individuals indicated in a metadata pandas DataFrame.
     Input :
         - ts       : tree data structure
         - metadata : pandas DataFrame (n_individuals, features) in which for each individual there are indicated both nodes ID in the ts in
                      columns named "node1" and "node2"
+        - snp      : float [0-1] denoting the proportion of variants to be included. This can be helpful if the user wants to experiment
+                     with the number of snps in the input
+        - typ      : str denoting the type of input that should be outputed by the function:
+                        - gt     : genotypes in a flat vector for all positions
+                        - gl_mix : mixture input that gives the gt of the allele and the second most likely genotype likelihood
+                        - gl     : the 3 genotype likelihoods in a flat vector for all positions. In other words 
+                                   the first 3 values of the output of this function will correspond to the genotype likelihoods
+                                   of the first variant and the next three, to the following variant and so on. 
+                        - gp     : similar to gl but for genotype probabilities. Right now genotype probabilities are computed
+                                   with a flat prior
+                        - gp_mix : similar to gl_mix but with gp
+                        - gl_gt  : similar to gt, but the gt represents the genotype with the highest gl
     Output :
-        -  allele_counts : numpy array (n_variants, n_individuals) with allele counts per individual.
+        -  allele_counts : numpy array (n_individuals, n_variants) with allele counts per individual.
             - 0 : Ancestral allele homozigous
             - 1 : Heterozygous
             - 2 : Derived allele homozigous 
@@ -189,7 +166,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
                 gm.append(v.genotypes.tolist())
     gm = np.array(gm)
     if typ == "gt":
-        return gm
+        return gm.T
     elif typ == "gl_mix":
         arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
@@ -213,7 +190,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
             GLmix.append(np.dstack((minGLidx[i::GL.shape[1]], midGLval[i::GL.shape[1]])).flatten().tolist())
         GLmix = np.array(GLmix)
 
-        return GLmix.T
+        return GLmix
     elif typ == "gp_mix":
         arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
@@ -239,18 +216,18 @@ def get_input(ts, metadata, snp, typ, cov, err):
             GPmix.append(np.dstack((minGPidx[i::GP.shape[1]], midGPval[i::GP.shape[1]])).flatten().tolist())
         GPmix = np.array(GPmix)
 
-        return GPmix.T
+        return GPmix
     elif typ == "gl":
         arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
-        return GL.transpose((1, 0, 2)).reshape(-1).reshape(GL.shape[1], GL.shape[0]*3).T
+        return GL.transpose((1, 0, 2)).reshape(-1).reshape(GL.shape[1], GL.shape[0]*3)
     elif typ == "gp":
         arc        = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL         = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
         likelihood = np.exp(-GL)
         prior      = np.array([1/4, 1/2, 1/4])
         GP         = likelihood*prior/(np.sum(likelihood*prior, axis = 2).reshape(GL.shape[:2] + (1,)))
-        return GP.transpose((1, 0, 2)).reshape(-1).reshape(GP.shape[1], GP.shape[0]*3).T
+        return GP.transpose((1, 0, 2)).reshape(-1).reshape(GP.shape[1], GP.shape[0]*3)
     elif typ == "gl_gt":
         arc      = simGL.sim_allelereadcounts(gm = gm, mean_depth = cov, std_depth = 1, e = err, ploidy = 2, seed = 1234)
         GL       = simGL.allelereadcounts_to_GL(arc = arc, e = err, ploidy = 2)[:, :, [0, 1, 4]]
@@ -260,7 +237,7 @@ def get_input(ts, metadata, snp, typ, cov, err):
         missing  = ((GL == 0).sum(axis = 2) == 3)
         minGLidx[missing] = -1
 
-        return minGLidx
+        return minGLidx.T
 
 def get_input_AADR(metadata, chrom, start, end):
     snp     = pd.read_table("/home/moicoll/spaceNNtime/data/AADR/v54.1_1240K_public_nospaces.snp", index_col = None, header = None, names = ["snp", "chr", "gen", "pos", "ref", "alt"])
@@ -280,7 +257,7 @@ def get_input_AADR(metadata, chrom, start, end):
 
         geno[geno == 9] = -1
 
-        return geno, snp[np.in1d(snp.chr, chrom) & (snp.pos >= start) & (snp.pos < end)].pos.to_numpy()
+        return geno.T, snp[np.in1d(snp.chr, chrom) & (snp.pos >= start) & (snp.pos < end)].pos.to_numpy()
     else:
         return None, None
 
@@ -552,21 +529,20 @@ def write_pred_AADR(sim, exp, nam, typ, cro, sta, end, gro, ind, idx, snp, run, 
 def write_qc_ind(ind, geno, file_name):
     pd.DataFrame({
         "ind" : ind,
-        "noncal" : np.sum(geno == -1, axis = 0),
-        "homref" : np.sum(geno ==  0, axis = 0),
-        "hethet" : np.sum(geno ==  1, axis = 0),
-        "homalt" : np.sum(geno ==  2, axis = 0),
-        "noncha" : np.sum((geno > 2) * (geno < -1), axis = 0)
-    }).to_csv(file_name, mode='w', header=False, sep = "\t", index = False)
-
-#B.11
-def write_qc_snp(snp, geno, file_name):
-    print(snp.shape, np.sum(geno == -1, axis = 1).shape)
-    pd.DataFrame({
-        "snp"    : snp,
         "noncal" : np.sum(geno == -1, axis = 1),
         "homref" : np.sum(geno ==  0, axis = 1),
         "hethet" : np.sum(geno ==  1, axis = 1),
         "homalt" : np.sum(geno ==  2, axis = 1),
         "noncha" : np.sum((geno > 2) * (geno < -1), axis = 1)
+    }).to_csv(file_name, mode='w', header=False, sep = "\t", index = False)
+
+#B.11
+def write_qc_snp(snp, geno, file_name):
+    pd.DataFrame({
+        "snp"    : snp,
+        "noncal" : np.sum(geno == -1, axis = 0),
+        "homref" : np.sum(geno ==  0, axis = 0),
+        "hethet" : np.sum(geno ==  1, axis = 0),
+        "homalt" : np.sum(geno ==  2, axis = 0),
+        "noncha" : np.sum((geno > 2) * (geno < -1), axis = 0)
     }).to_csv(file_name, mode='w', header=False, sep = "\t", index = False)

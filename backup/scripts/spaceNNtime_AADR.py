@@ -78,14 +78,8 @@ if type(input) != type(None):
         i = str(i)
         print("Processing batch {}".format(i), flush = True)
 
-        # norm_features = normalizer(nor = nfe, input_shape = input.T.shape[1])
-        # if nfe != "None":
-        #     norm_features.adapt(input[:, tra_val_tes[i]["tra"]].T)
-        # norm_labels   = normalizer(nor = nla, input_shape = output.shape[1])
-        # if nla != "None":
-        #     norm_labels.adapt(output[tra_val_tes[i]["tra"], :])
 
-        norm_features, mean_features, variance_features = normalizer(nor = nfe, array = input[:, tra_val_tes[i]["tra"]].T)
+        norm_features, mean_features, variance_features = normalizer(nor = nfe, array = input[tra_val_tes[i]["tra"]])
         norm_labels,   mean_labels,   variance_labels   = normalizer(nor = nla, array = output[tra_val_tes[i]["tra"]])
 
         model = spaceNNtime(output_shape  = output.shape[1], 
@@ -103,16 +97,16 @@ if type(input) != type(None):
         checkpoint, earlystop, reducelr = callbacks(weights_file_name = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/models/group{i}_{cro}_{sta}_{end}_weights.hdf5".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
         if dat == "default":
             history = train_spaceNNtime(model             = model, 
-                                        tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
+                                        tra_fea           = input[tra_val_tes[i]["tra"]], 
                                         tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]), 
-                                        val_fea           = input[:, tra_val_tes[i]["val"]].T, 
+                                        val_fea           = input[tra_val_tes[i]["val"]], 
                                         val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]),
                                         callbacks         = [checkpoint, earlystop, reducelr],
                                         tra_sample_weight = wsa[tra_val_tes[i]["tra"]])
                                         #val_sample_weight = wsa[tra_val_tes[i]["val"]])
         elif dat == "custom":
-            tra_gen = CustomDataGen(x = input[:, tra_val_tes[i]["tra"]].T, y = norm_labels(output[tra_val_tes[i]["tra"], :]).numpy(), x_weights = wsa[tra_val_tes[i]["tra"]])
-            val_gen = CustomDataGen(x = input[:, tra_val_tes[i]["val"]].T, y = norm_labels(output[tra_val_tes[i]["val"], :]).numpy(), x_weights = np.array([]))
+            tra_gen = CustomDataGen(x = input[tra_val_tes[i]["tra"]], y = norm_labels(output[tra_val_tes[i]["tra"]]).numpy(), x_weights = wsa[tra_val_tes[i]["tra"]])
+            val_gen = CustomDataGen(x = input[tra_val_tes[i]["val"]], y = norm_labels(output[tra_val_tes[i]["val"]]).numpy(), x_weights = np.array([]))
 
             history = train_spaceNNtime_datagen(model             = model, 
                                                 tra_gen           = tra_gen, 
@@ -130,7 +124,7 @@ if type(input) != type(None):
             plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/AADR/{exp}/history_plots/group{i}_{cro}_{sta}_{end}_history.png".format(exp = exp, i = i, cro = cro, sta = sta, end = end))
 
 
-        pred = model.predict(input[:, tra_val_tes[i]["tes"]].T)
+        pred = model.predict(input[tra_val_tes[i]["tes"]])
         pred = (pred*np.sqrt(variance_labels))+mean_labels
 
         new_file  = write_pred_AADR(sim       = "AADR", 
@@ -143,7 +137,7 @@ if type(input) != type(None):
                                     gro       = i, 
                                     ind       = metadata["indivi"].to_numpy()[tra_val_tes[i]["tes"]],
                                     idx       = tra_val_tes[i]["tes"], 
-                                    snp       = input.shape[0], 
+                                    snp       = input.shape[1], 
                                     run       = (time.time()-prev_time)/60.0, 
                                     pre       = pre, 
                                     true      = output[tra_val_tes[i]["tes"]],

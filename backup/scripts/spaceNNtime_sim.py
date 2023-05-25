@@ -43,7 +43,7 @@ elif wsa == "coverage":
     wsa = cov.reshape(-1, 2).sum(axis = 1)
     wsa = 1/(1+np.exp((-wsa/4.5)))
 
-input         = get_input(ts, metadata, snp, typ, cov, err)
+input         = get_input_simulated_tree(ts, metadata, snp, typ, cov, err)
 output        = get_output(pre, metadata)
 print("input shape:", input.shape)
 print(input)
@@ -62,7 +62,7 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
     i = str(i)
     print("Processing batch {}".format(i), flush = True)
 
-    norm_features, mean_features, variance_features = normalizer(nor = nfe, array = input[:, tra_val_tes[i]["tra"]].T)
+    norm_features, mean_features, variance_features = normalizer(nor = nfe, array = input[tra_val_tes[i]["tra"]])
     norm_labels,   mean_labels,   variance_labels   = normalizer(nor = nla, array = output[tra_val_tes[i]["tra"]])
     
     model = spaceNNtime(output_shape  = output.shape[1], 
@@ -80,17 +80,17 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
     checkpoint, earlystop, reducelr = callbacks(weights_file_name = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/models/group{i}_weights.hdf5".format(sim = sim, exp = exp, i = i))
     if dat == "default":
         history = train_spaceNNtime(model             = model, 
-                                    tra_fea           = input[:, tra_val_tes[i]["tra"]].T, 
+                                    tra_fea           = input[tra_val_tes[i]["tra"]], 
                                     tra_lab           = norm_labels(output[tra_val_tes[i]["tra"], :]).numpy(), 
-                                    val_fea           = input[:, tra_val_tes[i]["val"]].T, 
+                                    val_fea           = input[tra_val_tes[i]["val"]], 
                                     val_lab           = norm_labels(output[tra_val_tes[i]["val"], :]).numpy(),
                                     callbacks         = [checkpoint, earlystop, reducelr],
                                     tra_sample_weight = wsa[tra_val_tes[i]["tra"]])
                                     #val_sample_weight = wsa[tra_val_tes[i]["val"]])
 
     elif dat == "custom":
-        tra_gen = CustomDataGen(x = input[:, tra_val_tes[i]["tra"]].T, y = norm_labels(output[tra_val_tes[i]["tra"], :]).numpy(), x_weights = wsa[tra_val_tes[i]["tra"]])
-        val_gen = CustomDataGen(x = input[:, tra_val_tes[i]["val"]].T, y = norm_labels(output[tra_val_tes[i]["val"], :]).numpy(), x_weights = np.array([]))
+        tra_gen = CustomDataGen(x = input[tra_val_tes[i]["tra"]], y = norm_labels(output[tra_val_tes[i]["tra"], :]).numpy(), x_weights = wsa[tra_val_tes[i]["tra"]])
+        val_gen = CustomDataGen(x = input[tra_val_tes[i]["val"]], y = norm_labels(output[tra_val_tes[i]["val"], :]).numpy(), x_weights = np.array([]))
 
         history = train_spaceNNtime_datagen(model             = model, 
                                             tra_gen           = tra_gen, 
@@ -99,7 +99,7 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
 
     plot_loss(history = history, fig_path = "/home/moicoll/spaceNNtime/sandbox/{sim}/{exp}/history_plots/group{i}_history.png".format(sim = sim, exp = exp, i = i))
 
-    pred = model.predict(input[:, tra_val_tes[i]["tes"]].T)
+    pred = model.predict(input[tra_val_tes[i]["tes"]])
     pred = (pred*np.sqrt(variance_labels))+mean_labels
 
     new_file  = write_pred(sim       = sim, 
@@ -109,7 +109,7 @@ for j, i in enumerate(range(start_batch, len(tra_val_tes))):
                            gro       = i, 
                            ind       = metadata["ind_id"].to_numpy()[tra_val_tes[i]["tes"]],
                            idx       = tra_val_tes[i]["tes"], 
-                           snp       = input.shape[0], 
+                           snp       = input.shape[1], 
                            run       = (time.time()-prev_time)/60.0, 
                            pre       = pre, 
                            true      = output[tra_val_tes[i]["tes"]],
