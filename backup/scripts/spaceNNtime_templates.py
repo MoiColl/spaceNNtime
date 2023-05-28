@@ -360,6 +360,10 @@ def tf_haversine(latlon1, latlon2):
     lon1 = latlon1[:, 1]
     lat2 = latlon2[:, 0]
     lon2 = latlon2[:, 1]
+    
+    #latval = 90.0
+    #lonval = 180.0
+    #distmax   = 40_000.0
 
     REarth = 6371
     lat = tf.abs(lat1 - lat2) * np.pi / 180
@@ -368,7 +372,13 @@ def tf_haversine(latlon1, latlon2):
     lat2 = lat2 * np.pi / 180
     a = tf.sin(lat / 2) * tf.sin(lat / 2) + tf.cos(lat1) * tf.cos(lat2) * tf.sin(lon / 2) * tf.sin(lon / 2)
     d = 2 * tf_atan2(tf.sqrt(a), tf.sqrt(1 - a))
-    return REarth * d
+    dist = REarth * d
+    #dist[(lat2 > latval) + (lat2 < -latval) + (lon2 > lonval) + (lon2 < -lonval)] = distmax
+    #dist[lat2 > latval]  += ((lat2-latval)/latval)*distmax
+    #dist[lat2 < -latval] += ((-1*lat2-latval)/latval)*distmax
+    #dist[lon2 > lonval]  += ((lat2-lonval)/lonval)*distmax
+    #dist[lon2 < -lonval] += ((-1*lat2-lonval)/lonval)*distmax
+    return dist
 
 #B.11
 def haversine_distance_time_difference(w_space = 1, w_time = 1):

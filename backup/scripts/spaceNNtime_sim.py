@@ -41,6 +41,8 @@ if wsa == "None":
     wsa = np.ones(metadata.shape[0])
 elif wsa == "coverage":
     wsa = cov.reshape(-1, 2).sum(axis = 1)
+elif wsa == "coveragesigmoid":
+    wsa = cov.reshape(-1, 2).sum(axis = 1)
     wsa = 1/(1+np.exp((-wsa/4.5)))
 
 input         = get_input_simulated_tree(ts, metadata, snp, typ, cov, err)
